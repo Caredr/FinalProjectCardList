@@ -1,0 +1,102 @@
+-- GetAllByUserId(Guid userId)
+--SELECT Id,
+--       Name,
+--       UserId,
+--       ListId,
+--       CreatedAt,
+--       State,
+--       StateChangedAt,
+--       DeadLine
+--FROM ToDoItem
+--WHERE UserId = :UserId
+--ORDER BY CreatedAt DESC;
+
+-- GetActiveByUserId(Guid userId)
+-- предполагаем: 1 = Active
+--SELECT Id,
+--       Name,
+--       UserId,
+--       ListId,
+--       CreatedAt,
+--       State,
+--       StateChangedAt,
+--       DeadLine
+--FROM ToDoItem
+--WHERE UserId = :UserId
+--  AND State = 1
+--ORDER BY CreatedAt DESC;
+
+-- Get(Guid id)
+--SELECT Id,
+--       Name,
+--       UserId,
+--       ListId,
+--       CreatedAt,
+--       State,
+--       StateChangedAt,
+--       DeadLine
+--FROM ToDoItem
+--WHERE Id = :Id;
+
+---- Add(ToDoItem item)
+--INSERT INTO ToDoItem (
+--    Id,
+--    Name,
+--    UserId,
+--    ListId,
+--    CreatedAt,
+--    State,
+--    StateChangedAt,
+--    DeadLine
+--)
+--VALUES (
+--    :Id,
+--    :Name,
+--    :UserId,
+--    :ListId,
+--    :CreatedAt,
+--    :State,
+--    :StateChangedAt,
+--    :DeadLine
+--);
+
+--UPDATE ToDoItem
+--SET Name           = :Name,
+--    UserId         = :UserId,
+--    ListId         = :ListId,
+--    CreatedAt      = :CreatedAt,
+--    State          = :State,
+--    StateChangedAt = :StateChangedAt,
+--    DeadLine       = :DeadLine
+--WHERE Id = :Id;
+
+---- Delete(Guid id)
+--DELETE FROM ToDoItem
+--WHERE Id = :Id;
+
+---- ExistsByName(Guid userId, string name)
+--SELECT EXISTS (
+--    SELECT 1
+--    FROM ToDoItem
+--    WHERE UserId = :UserId
+--      AND LOWER(Name) = LOWER(:Name)
+--);
+
+---- CountActive(Guid userId)
+---- предполагаем: 1 = Active
+--SELECT COUNT(*) AS ActiveCount
+--FROM ToDoItem
+--WHERE UserId = :UserId
+--  AND State  = 1;
+
+-- Find(Guid userId, Func<ToDoItem, bool> predicate)
+--SELECT Id,
+--       Name,
+--       UserId,
+--       ListId,
+--       CreatedAt,
+--       State,
+--       StateChangedAt,
+--       DeadLine
+--FROM ToDoItem
+--WHERE UserId = :UserId;
