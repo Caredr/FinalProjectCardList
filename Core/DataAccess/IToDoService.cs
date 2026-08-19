@@ -17,7 +17,7 @@ namespace FinalProjectCardList.Core.DataAccess
         //Возвращает все ToDoItem для UserId, отсортированные по CreatedAt в порядке убывания.
         Task<IReadOnlyList<ToDoItem>> GetAllByUserIdAsync(Guid userId, CancellationToken ct);
         //Возвращает ToDoItem для UserId со статусом Active
-        Task<ToDoItem> AddAsync(ToDoUser user, string name, ToDoList? list, DateTime deadLine, CancellationToken ct);
+        Task<ToDoItem> AddAsync(ToDoUser user, string name, ToDoList? list, DateTime deadLine, int quantity, CancellationToken ct);
         // Обновляет существующую задачу. Ищет задачу по id, если не находит, то выбрасывает исключение. Если находит, то обновляет имя, дедлайн и список дел задачи.
         Task MarkCompletedAsync(Guid id, CancellationToken ct);
         // Удаляет задачу по id. Если задачи нет, то выбрасывает исключение

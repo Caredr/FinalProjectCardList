@@ -128,10 +128,10 @@ namespace FinalProjectCardList.Core.TelegramBot
                     case "/report":
                         {
                             var (total, completed, active, generatedAt) = await _iToDoReportService.GetUserStats(toDoUser.UserId, ct);
-                            var text = $"Статистика задач:\n" +
+                            var text = $"Статистика спискам карт:\n" +
                                        $"- Всего: {total}\n" +
-                                       $"- Выполнено: {completed}\n" +
-                                       $"- Активные: {active}\n" +
+                                       $"- Найдено: {completed}\n" +
+                                       $"- Нужно купить: {active}\n" +
                                        $"- Сформировано: {generatedAt:g}";
 
                             await botClient.SendMessage(chatId: update.Message!.Chat.Id, text: text, cancellationToken: ct);
@@ -208,7 +208,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                             if (Guid.TryParse(idPart, out taskId))
                             {
                                 await _iToDoService.DeleteAsync(taskId, ct);
-                                await botClient.SendMessage(update.Message.Chat, "Задача удалена", cancellationToken: ct);
+                                await botClient.SendMessage(update.Message.Chat, "Карта удалена", cancellationToken: ct);
                             }
                             else
                             {
@@ -234,7 +234,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                             var found = await _iToDoService.FindAsync(toDoUser, prefix, ct);
                             if (found.Count == 0)
                             {
-                                await botClient.SendMessage(update.Message.Chat, "Задачи не найдены.", cancellationToken: ct);
+                                await botClient.SendMessage(update.Message.Chat, "Карты не найдены.", cancellationToken: ct);
                             }
                             else
                             {
@@ -287,7 +287,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                 // Сохраняем контекст в репозитории — чтобы следующее сообщение попало в сценарий
                 await _contextRepository.SetContext(userId, newContext, ct);
                 // Просим пользователя ввести название нового списка
-                await botClient.SendMessage(callbackQuery.Message!.Chat.Id, "Введите название нового списка:", cancellationToken: ct);
+                await botClient.SendMessage(callbackQuery.Message!.Chat.Id, "Введите название нового списка карт:", cancellationToken: ct);
                 // Устанавливаем шаг "Name" — следующее сообщение будет обработано как имя 
                 newContext.CurrentStep = "Name";
                 // Сохраняем обновлённый контекст с новым шагом
@@ -549,8 +549,9 @@ namespace FinalProjectCardList.Core.TelegramBot
                     string state = item.State == ToDoItemState.Active ? "[ ]" : "[x]";
                     // Формируем строку дедлайна, если он задан
                     string deadline = item.Deadline.HasValue ? $"Дедлайн: {item.Deadline.Value:dd.MM.yyyy}" : string.Empty;
+                    string quantity = item.Quantity > 1 ? $"\n🔢 Копий: {item.Quantity}" : string.Empty;
                     // Собираем итоговый текст сообщения
-                    string text = $"{state} {item.Name}{deadline}";
+                    string text = $"{state} {item.Name}{deadline}{quantity}";
                     // Создаём инлайн-клавиатуру с двумя кнопками действий над задачей
                     var keyboard = new InlineKeyboardMarkup(new[]
                     {
@@ -584,9 +585,10 @@ namespace FinalProjectCardList.Core.TelegramBot
                 {
                     // Помечаем задачу выполненной и сохраняем через репозиторий
                     await _iToDoService.MarkCompletedAsync(dto.ToDoItemId, ct);
+                    string quantityText = item.Quantity > 1 ? $" ({item.Quantity}x)" : "";  // Добавить
                     // Сообщаем пользователю об успехе
                     await botClient.SendMessage(callbackQuery.Message!.Chat.Id,
-                        $"✅ Задача \"{item.Name}\" выполнена.", cancellationToken: ct);
+                    $"✅ Задача \"{item.Name}\"{quantityText} выполнена.", cancellationToken: ct);  // Изменено
                 }
                 // Подтверждаем обработку callback
                 await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
@@ -597,7 +599,7 @@ namespace FinalProjectCardList.Core.TelegramBot
             // БЛОК 5c: Удалить задачу напрямую (из кнопки в деталях задачи)
             // Отличие от DeleteTask сценария: удаление без шагов, сразу по нажатию
             // ─────────────────────────────────────────────
-            if (callbackData.StartsWith("deletetask|"))
+            if (callbackData.StartsWith("deletetask"))
             {
                 // Разбираем данные кнопки — внутри зашит Guid задачи
                 var dto = ToDoItemCallbackDto.FromString(callbackData);
@@ -607,9 +609,10 @@ namespace FinalProjectCardList.Core.TelegramBot
                 {
                     // Удаляем задачу через сервис
                     await _iToDoService.DeleteAsync(dto.ToDoItemId, ct);
+                    string quantityText = item.Quantity > 1 ? $" ({item.Quantity}x)" : "";  
                     // Сообщаем пользователю об успехе
                     await botClient.SendMessage(callbackQuery.Message!.Chat.Id,
-                        $"🗑 Задача \"{item.Name}\" удалена.", cancellationToken: ct);
+                        $"🗑 Задача \"{item.Name}\" {quantityText} удалена.", cancellationToken: ct);
                 }
                 // Подтверждаем обработку callback
                 await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
@@ -717,6 +720,8 @@ namespace FinalProjectCardList.Core.TelegramBot
         {
             string state = task.State == ToDoItemState.Active ? "[ ]" : "[x]";
             string label = $"{state} {task.Name}";
+            if (task.Quantity > 1)
+                label += $" ({task.Quantity}x)";
             return label.Length > 40 ? label[..40] : label;
         }
 
@@ -750,7 +755,7 @@ namespace FinalProjectCardList.Core.TelegramBot
             if (active.Count == 0)
             {
                 var emptyMarkup = new InlineKeyboardMarkup(new[] { new[] { showCompletedButton } });
-                await bot.EditMessageText(chatId, messageId, $"Список: {listName}\n\nАктивных задач нет.",
+                await bot.EditMessageText(chatId, messageId, $"Список: {listName}\n\n Все нужные карты найденны.",
                     replyMarkup: emptyMarkup, cancellationToken: ct);
                 await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
                 return;
@@ -789,13 +794,13 @@ namespace FinalProjectCardList.Core.TelegramBot
             int messageId = callbackQuery.Message.MessageId;
 
             var backButton = InlineKeyboardButton.WithCallbackData(
-                "⬅️ К активным",
+                "⬅️ К тем что нужно найти",
                 new PagedListCallbackDto("show", listDto.ToDoListId, 0).ToString());
 
             if (completed.Count == 0)
             {
                 var emptyMarkup = new InlineKeyboardMarkup(new[] { new[] { backButton } });
-                await bot.EditMessageText(chatId, messageId, "Задач нет",
+                await bot.EditMessageText(chatId, messageId, "Карт нет",
                     replyMarkup: emptyMarkup, cancellationToken: ct);
                 await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
                 return;
@@ -812,7 +817,7 @@ namespace FinalProjectCardList.Core.TelegramBot
             rows.Add(new[] { backButton });
             markup = new InlineKeyboardMarkup(rows);
 
-            await bot.EditMessageText(chatId, messageId, "Выполненные задачи:",
+            await bot.EditMessageText(chatId, messageId, "Найденные карты:",
                 replyMarkup: markup, cancellationToken: ct);
             await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
         }
@@ -841,12 +846,12 @@ namespace FinalProjectCardList.Core.TelegramBot
                 "\n /start - задает или меняет ваше имя" +
                 "\n /help - доска информации" +
                 "\n /info - дата создания программы" +
-                "\n /addtask - добавить задачу" +
-                "\n /deletetask - удалить задачу (выбор списка → задачи → подтверждение)" +
-                "\n /show - показать списки (выбери список — активные задачи постранично, можно посмотреть выполненные)" +
-                "\n /report - Статистика по задачам" +
+                "\n /addtask - добавить карту" +
+                "\n /deletetask - удалить карту (выбор списка → задачи → подтверждение)" +
+                "\n /show - показать списки карт (выбери список — активные задачи постранично, можно посмотреть выполненные)" +
+                "\n /report - Статистика по картам" +
                 "\n /find - Найти по имени" +
-                "\n /removetask - убрать задачу" +
+                "\n /removetask - удалить карту" +
                 "\n /completetask - поставить статус - Completed" +
                 "\n /cancel  - отмена текущего ввода");
         }

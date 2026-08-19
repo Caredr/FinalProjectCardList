@@ -39,6 +39,8 @@ namespace FinalProjectCardList.Core.DataAccess.Models
 
         [Column("ListId")]
         public Guid? ListId { get; set; }
+        [Column("Quantity")]
+        [Column] public int Quantity { get; set; } = 1;
 
         // Связи
         [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoUserModel.UserId))]

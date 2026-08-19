@@ -17,6 +17,7 @@ namespace FinalProjectCardList.Core.Entities
         public DateTime? StateChangedAt { get; set; } //Когда изменилось состояние
         public DateTime? Deadline { get; set; } //Срок выполнения (опционально)
         public ToDoList? List { get; set; } //Список, к которому принадлежит (опционально)
+        public int Quantity { get; set; } = 1;
 
     }
 }

@@ -105,6 +105,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 .Set(i => i.DeadLine, updated.DeadLine)
                 .Set(i => i.User, updated.User)
                 .Set(i => i.List, updated.List)
+                .Set(i => i.Quantity, updated.Quantity)
                 .UpdateAsync(ct);
         }
 
