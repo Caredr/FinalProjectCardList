@@ -15,7 +15,7 @@ namespace FinalProjectCardList.Core.Services
         public readonly int TaskLengthLimitMax = 100;
         public readonly int TaskLengthLimitMin = 3;
 
-        public async Task<ToDoItem> AddAsync(ToDoUser user, string name, ToDoList? list, DateTime deadLine, CancellationToken ct)
+        public async Task<ToDoItem> AddAsync(ToDoUser user, string name, ToDoList? list, DateTime deadLine, int quantity, CancellationToken ct)
         {
             // Валидация: имя не пустое
             if (string.IsNullOrWhiteSpace(name))
@@ -37,6 +37,7 @@ namespace FinalProjectCardList.Core.Services
                 Deadline = deadLine == DateTime.MaxValue
         ? null
         : deadLine,
+                Quantity = quantity,  // Установка количества
                 State = ToDoItemState.Active,
                 StateChangedAt = DateTime.UtcNow
             };

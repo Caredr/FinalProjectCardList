@@ -9,7 +9,6 @@ CREATE TABLE ToDoUser
 CREATE TABLE ToDoList
 (
     Id             uuid        NOT NULL PRIMARY KEY,
-
     Name           text        NULL,
     UserId         uuid        NOT NULL,
     CreatedAt      timestamptz NOT NULL
@@ -26,7 +25,8 @@ CREATE TABLE ToDoItem
     CreatedAt        timestamptz NOT NULL,
     State            int         NOT NULL,
     StateChangedAt   timestamptz NULL,
-    DeadLine         timestamptz NULL
+    DeadLine         timestamptz NULL,
+    Quantity         int  NOT NULL DEFAULT 1
 );
 
 CREATE TABLE Notification

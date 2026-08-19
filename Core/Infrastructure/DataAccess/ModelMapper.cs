@@ -48,7 +48,8 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 StateChangedAt = model.StateChangedAt,
                 Deadline = model.DeadLine,
                 User = MapFromModel(model.User),
-                List = MapFromModel(model.List)
+                List = MapFromModel(model.List),
+                Quantity = model.Quantity
             };
         }
 
@@ -66,7 +67,8 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 StateChangedAt = entity.StateChangedAt,
                 DeadLine = entity.Deadline,
                 User = MapToModel(entity.User),
-                List = MapToModel(entity.List)
+                List = MapToModel(entity.List),
+                Quantity = entity.Quantity
             };
         }
 

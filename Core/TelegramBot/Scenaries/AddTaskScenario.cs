@@ -107,7 +107,36 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                         context.CurrentStep = "SelectList";
                         return ScenarioResult.Transition;
                     }
+                case "Quantity":
+                    {
+                        if (string.IsNullOrWhiteSpace(inputText))
+                        {
+                            await bot.SendMessage(
+                                message.Chat.Id,
+                                "Количество не может быть пустым!",
+                                cancellationToken: ct);
+                            return ScenarioResult.Transition;
+                        }
 
+                        if (!int.TryParse(inputText, out var quantity) || quantity <= 0)
+                        {
+                            await bot.SendMessage(
+                                message.Chat.Id,
+                                "❌ Введите положительное число!",
+                                cancellationToken: ct);
+                            return ScenarioResult.Transition;
+                        }
+
+                        context.Data["Quantity"] = quantity;
+
+                        await bot.SendMessage(
+                            message.Chat.Id,
+                            "Введите название задачи:",
+                            cancellationToken: ct);
+
+                        context.CurrentStep = "Name";
+                        return ScenarioResult.Transition;
+                    }
                 // Шаг 1: ввод имени
                 case "Name":
                     {
@@ -158,7 +187,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                             context.Data.Clear();
                             return ScenarioResult.Completed;
                         }
-
+                        var quantity = context.Data.TryGetValue("Quantity", out var qObj) && qObj is int q ? q : 1;
                         // Восстанавливаем выбранный список
                         ToDoList? list = null;
                         if (context.Data.TryGetValue("ToDoList", out var listObj) &&
@@ -275,7 +304,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                 "Введите название задачи:",
                 cancellationToken: ct);
 
-            context.CurrentStep = "Name";
+            context.CurrentStep = "Quantity";
 
             await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
             return ScenarioResult.Transition;
