@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.DataAccess.Models
 {
-    [Table("ToDoItems")]
+    [Table("ToDoItem")]
     internal class ToDoItemModel
     {
         [Column("Id")]
@@ -30,8 +30,8 @@ namespace FinalProjectCardList.Core.DataAccess.Models
         [Column("StateChangedAt")]
         public DateTime? StateChangedAt { get; set; }
 
-        [Column("DeadLine")]
-        public DateTime? DeadLine { get; set; }
+        [Column("Deadline")]
+        public DateTime? Deadline { get; set; }
 
         // Внешние ключи
         [Column("UserId")]

@@ -18,6 +18,7 @@
   <ItemGroup>
     <PackageReference Include="linq2db" Version="6.3.0" />
     <PackageReference Include="linq2db.PostgreSQL" Version="6.3.0" />
+	<PackageReference Include="Npgsql" Version="8.0.3" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 ﻿using FinalProjectCardList.Core.DataAccess.Models;
 using FinalProjectCardList.Core.Entities;
+using System.Reflection;
 
 
 namespace FinalProjectCardList.Core.Infrastructure.DataAccess
@@ -42,13 +43,13 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
             return new ToDoItem
             {
                 Id = model.Id,
+                UserId = model.UserId,
+                ListId = model.ListId,
                 Name = model.Name,
                 CreatedAt = model.CreatedAt,
                 State = (ToDoItemState)model.State,
                 StateChangedAt = model.StateChangedAt,
-                Deadline = model.DeadLine,
-                User = MapFromModel(model.User),
-                List = MapFromModel(model.List),
+                Deadline = model.Deadline,   // колонка DeadLine в БД
                 Quantity = model.Quantity
             };
         }
@@ -58,18 +59,25 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            return new ToDoItemModel
+            var model = new ToDoItemModel
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                UserId = entity.Id,
+                ListId = entity.ListId,          // достаточно Id,
                 CreatedAt = entity.CreatedAt,
-                State = entity.State,   // ПОПРАВКА: одно преобразование
+                State = entity.State,
                 StateChangedAt = entity.StateChangedAt,
-                DeadLine = entity.Deadline,
-                User = MapToModel(entity.User),
-                List = MapToModel(entity.List),
+                Deadline = entity.Deadline,
                 Quantity = entity.Quantity
             };
+            // если список есть — маппим навигационное свойство, если нет — оставляем null
+            if (entity.User != null)
+                model.User = MapToModel(entity.User);
+            if (entity.ListId != null)
+                model.List = MapToModel(entity.List);
+
+            return model;
         }
 
         public static ToDoList MapFromModel(ToDoListModel model)

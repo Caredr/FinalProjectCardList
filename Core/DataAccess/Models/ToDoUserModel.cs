@@ -12,7 +12,7 @@ namespace FinalProjectCardList.Core.DataAccess.Models
     {
         [PrimaryKey, Identity, Column("UserId")]
         public Guid UserId { get; set; }
-        [Column("TelegramUseName"), NotNull]
+        [Column("TelegramUserName"), NotNull]
         public string TelegramUserName { get; set; }
         [Column("RegisteredAt")]
         public DateTime RegisteredAt { get; set; }
@@ -20,7 +20,7 @@ namespace FinalProjectCardList.Core.DataAccess.Models
         public long TelegramUserId { get; set; }
 
         [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoListModel.User.UserId))]
-        public IList<ToDoListModel> ToDoLists { get; set; } = [];
+        public IList<ToDoListModel> ToDoList { get; set; } = [];
 
 
     }

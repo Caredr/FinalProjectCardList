@@ -69,6 +69,10 @@ ALTER TABLE ToDoItem
         ON UPDATE NO ACTION
         ON DELETE NO ACTION;
 
+ALTER TABLE Notification
+    ADD CONSTRAINT fk_notification_user
+        FOREIGN KEY (UserId)
+        REFERENCES ToDoUser (UserId);
 
 -- Индекс для ToDoList.UserId
 CREATE INDEX idx_todolist_user_id

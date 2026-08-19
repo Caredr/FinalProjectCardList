@@ -9,15 +9,24 @@ namespace FinalProjectCardList.Core.Entities
     internal class ToDoItem // это сущность (entity) для отдельной задачи в ToDo-приложении.
                             // Хранит полную информацию об одной задаче пользователя.
     {
-        public Guid Id { get; set; } //Уникальный идентификатор задачи
-        public ToDoUser User { get; set; } //Владелец задачи
-        public string Name { get; set; } //Название/описание задачи
-        public DateTime CreatedAt { get; set; } //Время создания (UTC)
-        public ToDoItemState State { get; set; } //Состояние
-        public DateTime? StateChangedAt { get; set; } //Когда изменилось состояние
-        public DateTime? Deadline { get; set; } //Срок выполнения (опционально)
-        public ToDoList? List { get; set; } //Список, к которому принадлежит (опционально)
-        public int Quantity { get; set; } = 1;
+        // Уникальный идентификатор задачи (PRIMARY KEY в таблице ToDoItem)
+        public Guid Id { get; set; }
 
+        // Внешний ключ на пользователя (колонка UserId в таблице ToDoItem)
+        public Guid UserId { get; set; }
+
+        // Внешний ключ на список (колонка ListId в таблице ToDoItem, может быть null)
+        public Guid? ListId { get; set; }
+
+        // Навигационные свойства (для удобства в коде, не для хранения в FK)
+        public ToDoUser User { get; set; }       // владелец задачи
+        public ToDoList? List { get; set; }      // список, к которому задача привязана
+
+        public string Name { get; set; }         // название/описание задачи
+        public DateTime CreatedAt { get; set; }  // время создания (UTC)
+        public ToDoItemState State { get; set; } // состояние задачи
+        public DateTime? StateChangedAt { get; set; }
+        public DateTime? Deadline { get; set; }  // дедлайн (опционально)
+        public int Quantity { get; set; } = 1;   // количество (копий карты и т.п.)
     }
 }

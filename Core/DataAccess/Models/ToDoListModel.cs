@@ -7,7 +7,7 @@ using LinqToDB.Mapping;
 
 namespace FinalProjectCardList.Core.DataAccess.Models
 {
-    [Table("ToDoLists")]
+    [Table("ToDoList")]
     internal class ToDoListModel
     {
         [Column("Id")]

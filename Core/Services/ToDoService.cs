@@ -87,11 +87,11 @@ namespace FinalProjectCardList.Core.Services
             // Читаем все задачи из файлов и собираем уникальные списки
             var allItems = await _iToDoRepository.GetAllByUserId(userId, ct);
             var lists = allItems
-                .Where(i => i.List is not null)
-                .Select(i => i.List!)
-                .GroupBy(l => l.Id)
-                .Select(g => g.First())
-                .ToList();
+       .Where(i => i.List is not null)   // у задачи есть список
+       .Select(i => i.List!)             // берём сам ToDoList
+       .GroupBy(l => l.Id)               // группируем по Id списка
+       .Select(g => g.First())           // оставляем по одному экземпляру
+       .ToList();
             return lists.AsReadOnly();
         }
 
@@ -106,8 +106,8 @@ namespace FinalProjectCardList.Core.Services
             var filtered = allItems.Where(item =>
             {
                 bool listMatch = listId.HasValue
-                    ? item.List is not null && item.List.Id == listId.Value
-                    : item.List is null;
+    ? item.List is not null && item.List.Id == listId.Value
+    : item.List is null;
                 bool stateMatch = stateFilter == null || item.State == stateFilter;
                 return listMatch && stateMatch;
             }).ToList();

@@ -23,7 +23,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var model = await dbContext.ToDoLists
+            var model = await dbContext.ToDoList
                 .LoadWith(i => i.User)
                 .FirstOrDefaultAsync(i => i.Id == id, ct);
 
@@ -36,7 +36,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var models = await dbContext.ToDoLists
+            var models = await dbContext.ToDoList
                 .LoadWith(i => i.User)
                 .Where(i => i.UserId == userId)
                 .ToListAsync(ct);
@@ -62,7 +62,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var rowsAffected = await dbContext.ToDoLists
+            var rowsAffected = await dbContext.ToDoList
                 .Where(i => i.Id == id)
                 .DeleteAsync(ct);
 
@@ -74,7 +74,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            return await dbContext.ToDoLists
+            return await dbContext.ToDoList
                 .LoadWith(i => i.User)
                 .AnyAsync(i => i.UserId == userId && i.Name == name, ct);
         }
