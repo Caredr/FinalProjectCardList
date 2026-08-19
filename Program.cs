@@ -26,10 +26,10 @@ namespace FinalProjectCardList
                 CancellationTokenSource sourceToken = new();
                 CancellationToken token = sourceToken.Token;
 
-                var botClient = new TelegramBotClient("TOKEN");
+                var botClient = new TelegramBotClient("8531549139:AAGbr5w3jVvce4Bj0FvTXItzOXStzKbJn6c");
 
                 string connectionString =
-                    "connectionString";
+                    "Host=localhost;Port=5432;Database=CardsLists;Username=postgres;Password=789web15";
 
                 DataContextFactory factory = new DataContextFactory(connectionString);
 
@@ -75,10 +75,11 @@ namespace FinalProjectCardList
 
                 backgroundTaskRunner.AddTask(new NotificationBackgroundTask( notificationService: notificationService,
                     bot: botClient));
-                backgroundTaskRunner.AddTask(new DeadlineBackgroundTask(
-                     notificationService: notificationService,
-                          userRepository: userRepo, 
-                             toDoRepository: toDoRepo));
+                backgroundTaskRunner.AddTask(new DeadlineBackgroundTask( notificationService: notificationService,
+                          userRepository: userRepo, toDoRepository: toDoRepo));
+                backgroundTaskRunner.AddTask(new TodayBackgroundTask(notificationService: notificationService,
+                    userRepository: userRepo, toDoRepository: toDoRepo));
+
                 backgroundTaskRunner.StartTasks(token);
 
                 botClient.StartReceiving(
@@ -87,10 +88,7 @@ namespace FinalProjectCardList
                     receiverOptions,
                     token);
 
-                backgroundTaskRunner.AddTask(new TodayBackgroundTask(
-                    notificationService: notificationService,
-                    userRepository: userRepo,
-                    toDoRepository: toDoRepo));
+
 
                 await botClient.SetMyCommands(new[]
                 {

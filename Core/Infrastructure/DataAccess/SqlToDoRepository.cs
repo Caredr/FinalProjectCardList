@@ -23,7 +23,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var models = await dbContext.ToDoItems
+            var models = await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
@@ -39,7 +39,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var models = await dbContext.ToDoItems
+            var models = await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
@@ -55,7 +55,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var model = await dbContext.ToDoItems
+            var model = await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
@@ -85,7 +85,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
 
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var existing = await dbContext.ToDoItems
+            var existing = await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
@@ -96,13 +96,13 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
 
             var updated = ModelMapper.MapToModel(item);
 
-            await dbContext.ToDoItems
+            await dbContext.ToDoItem
                 .Where(i => i.Id == item.Id)
                 .Set(i => i.Name, updated.Name)
                 .Set(i => i.CreatedAt, updated.CreatedAt)
                 .Set(i => i.State, updated.State)
                 .Set(i => i.StateChangedAt, updated.StateChangedAt)
-                .Set(i => i.DeadLine, updated.DeadLine)
+                .Set(i => i.Deadline, updated.Deadline)
                 .Set(i => i.User, updated.User)
                 .Set(i => i.List, updated.List)
                 .Set(i => i.Quantity, updated.Quantity)
@@ -113,7 +113,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var rowsAffected = await dbContext.ToDoItems
+            var rowsAffected = await dbContext.ToDoItem
                 .Where(i => i.Id == id)
                 .DeleteAsync(ct);
 
@@ -125,7 +125,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            return await dbContext.ToDoItems
+            return await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
@@ -136,7 +136,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            return await dbContext.ToDoItems
+            return await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
@@ -150,7 +150,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
 
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var models = await dbContext.ToDoItems
+            var models = await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
@@ -167,14 +167,14 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var models = await dbContext.ToDoItems
+            var models = await dbContext.ToDoItem
                 .LoadWith(i => i.User)
                 .LoadWith(i => i.List)
                 .LoadWith(i => i.List!.User)
                 .Where(i => i.User.UserId == userId
                             && i.State != ToDoItemState.Completed
-                            && i.DeadLine >= from
-                            && i.DeadLine < to)
+                            && i.Deadline >= from
+                            && i.Deadline < to)
                 .ToListAsync(ct);
 
             return models

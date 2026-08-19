@@ -10,8 +10,8 @@ internal class ToDoDataContext : LinqToDB.Data.DataConnection
         : base(ProviderName.PostgreSQL, connectionString)
     {
     }
-    public ITable<ToDoUserModel> ToDoUsers => this.GetTable<ToDoUserModel>();
-    public ITable<ToDoListModel> ToDoLists => this.GetTable<ToDoListModel>();
-    public ITable<ToDoItemModel> ToDoItems => this.GetTable<ToDoItemModel>();
-    public ITable<NotificationModel> Notifications => this.GetTable<NotificationModel>();
+    public ITable<ToDoUserModel> ToDoUser => this.GetTable<ToDoUserModel>();
+    public ITable<ToDoListModel> ToDoList => this.GetTable<ToDoListModel>();
+    public ITable<ToDoItemModel> ToDoItem => this.GetTable<ToDoItemModel>();
+    public ITable<NotificationModel> Notification => this.GetTable<NotificationModel>();
 }

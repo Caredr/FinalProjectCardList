@@ -25,7 +25,7 @@ namespace FinalProjectCardList.Core.Infrastructure
        string text,DateTime scheduledAt, CancellationToken ct)
         {
             using var db = _factory.CreateDataContext();
-            var exists = await db.Notifications
+            var exists = await db.Notification
                 .AnyAsync(n => n.UserId == userId && n.Type == type, ct)
                 .ConfigureAwait(false);
 
@@ -55,7 +55,7 @@ namespace FinalProjectCardList.Core.Infrastructure
         {
             using var db = _factory.CreateDataContext();
 
-            var models = await db.Notifications
+            var models = await db.Notification
                 .Where(n => !n.IsNotified && n.ScheduledAt <= scheduledBefore)
                 .ToListAsync(ct)
                 .ConfigureAwait(false);
@@ -70,7 +70,7 @@ namespace FinalProjectCardList.Core.Infrastructure
         {
             using var db = _factory.CreateDataContext();
 
-            await db.Notifications
+            await db.Notification
                 .Where(n => n.Id == notificationId)
                 .Set(n => n.IsNotified, true)
                 .Set(n => n.NotifiedAt, DateTime.UtcNow)

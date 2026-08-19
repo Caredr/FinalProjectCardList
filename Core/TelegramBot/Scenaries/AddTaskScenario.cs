@@ -204,7 +204,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                                 System.Globalization.DateTimeStyles.None,
                                 out DateTime deadline))
                         {
-                            var item = await _todoService.AddAsync(user, taskName, list, deadline, ct);
+                            var item = await _todoService.AddAsync(user, taskName, list, deadline,quantity, ct);
 
                             await bot.SendMessage(
                                 message.Chat.Id,
@@ -218,7 +218,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                         }
                         else if ((inputText ?? "").Equals("/skip", StringComparison.OrdinalIgnoreCase))
                         {
-                            var item = await _todoService.AddAsync(user, taskName, list, DateTime.MaxValue, ct);
+                            var item = await _todoService.AddAsync(user, taskName, list, DateTime.MaxValue,quantity, ct);
 
                             await bot.SendMessage(
                                 message.Chat.Id,

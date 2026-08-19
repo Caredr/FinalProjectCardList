@@ -45,10 +45,21 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                     if (todoUserInName == null)
                         return ScenarioResult.Completed;
                     var name = update?.Message?.Text;
-                    await _iToDoListService.AddAsync(todoUserInName, name, ct);
+                    try
+                    {
+                        await _iToDoListService.AddAsync(todoUserInName, name, ct);
                     await bot.SendMessage(update?.Message?.Chat.Id, "Список создан!", cancellationToken: ct);
                     context.CurrentStep = null;
                     return ScenarioResult.Completed;
+                    }
+                    catch (Exception ex)
+                    {
+                        await bot.SendMessage(update.Message.Chat.Id,
+                            $"Ошибка при создании списка: {ex.Message}",
+                            cancellationToken: ct);
+                        context.CurrentStep = null;  // чтобы не зависать в сценарии
+                        return ScenarioResult.Completed;
+                    }
                 default:
                     await bot.SendMessage(update?.Message?.Chat.Id, "Неизвестный шаг", cancellationToken: ct);
                     return ScenarioResult.Completed;

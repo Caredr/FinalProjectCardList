@@ -19,7 +19,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var model = await dbContext.ToDoUsers
+            var model = await dbContext.ToDoUser
                 .FirstOrDefaultAsync(u => u.UserId == userId, ct);
 
             return model is null
@@ -30,7 +30,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 
-            var model = await dbContext.ToDoUsers
+            var model = await dbContext.ToDoUser
                 .FirstOrDefaultAsync(u => u.TelegramUserId == telegramUserId, ct);
 
             return model is null
@@ -53,7 +53,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         public async Task<IReadOnlyList<ToDoUser>> GetUsers(CancellationToken ct)
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
-            var models = await dbContext.ToDoUsers
+            var models = await dbContext.ToDoUser
                 .ToListAsync(ct);
             return models
                 .Select(ModelMapper.MapFromModel)
