@@ -17,6 +17,9 @@ namespace FinalProjectCardList.Core.DataAccess.Models
         [Column("Id")]
         [PrimaryKey]
         public Guid Id { get; set; }
+        // Внешние ключи
+        [Column("UserId")]
+        public Guid UserId { get; set; }
 
         [Column("Name")]
         public string Name { get; set; } = string.Empty;
@@ -32,10 +35,6 @@ namespace FinalProjectCardList.Core.DataAccess.Models
 
         [Column("Deadline")]
         public DateTime? Deadline { get; set; }
-
-        // Внешние ключи
-        [Column("UserId")]
-        public Guid UserId { get; set; }
 
         [Column("ListId")]
         public Guid? ListId { get; set; }

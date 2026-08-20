@@ -18,14 +18,13 @@ CREATE TABLE ToDoItem
 (
     Id               uuid        NOT NULL
         PRIMARY KEY,
-
-    Name             text        NOT NULL,
     UserId           uuid        NOT NULL,
+    Name             text        NOT NULL,
     ListId           uuid        NULL,
     CreatedAt        timestamptz NOT NULL,
     State            int         NOT NULL,
     StateChangedAt   timestamptz NULL,
-    DeadLine         timestamptz NULL,
+    Deadline         timestamptz NULL,
     Quantity         int  NOT NULL DEFAULT 1
 );
 

@@ -31,9 +31,9 @@ namespace FinalProjectCardList.Core.Services
             ToDoItem newTask = new()
             {
                 Id = Guid.NewGuid(),
-                User = user,
+                UserId = user,
                 Name = name,
-                List = list,
+                ListId = list,
                 Deadline = deadLine == DateTime.MaxValue
         ? null
         : deadLine,
@@ -87,8 +87,8 @@ namespace FinalProjectCardList.Core.Services
             // Читаем все задачи из файлов и собираем уникальные списки
             var allItems = await _iToDoRepository.GetAllByUserId(userId, ct);
             var lists = allItems
-       .Where(i => i.List is not null)   // у задачи есть список
-       .Select(i => i.List!)             // берём сам ToDoList
+       .Where(i => i.ListId is not null)   // у задачи есть список
+       .Select(i => i.ListId!)             // берём сам ToDoList
        .GroupBy(l => l.Id)               // группируем по Id списка
        .Select(g => g.First())           // оставляем по одному экземпляру
        .ToList();
@@ -106,8 +106,8 @@ namespace FinalProjectCardList.Core.Services
             var filtered = allItems.Where(item =>
             {
                 bool listMatch = listId.HasValue
-    ? item.List is not null && item.List.Id == listId.Value
-    : item.List is null;
+    ? item.ListId is not null && item.ListId.Id == listId.Value
+    : item.ListId is null;
                 bool stateMatch = stateFilter == null || item.State == stateFilter;
                 return listMatch && stateMatch;
             }).ToList();
