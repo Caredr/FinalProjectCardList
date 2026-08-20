@@ -71,7 +71,9 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 State = entity.State,
                 StateChangedAt = entity.StateChangedAt,
                 Deadline = entity.Deadline,
-                Quantity = entity.Quantity
+                Quantity = entity.Quantity,
+                User = entity.UserId != null ? MapToModel(entity.UserId) : null,
+                List = entity.ListId != null ? MapToModel(entity.ListId) : null
             };
             // если список есть — маппим навигационное свойство, если нет — оставляем null
             if (entity.UserId != null)
@@ -93,7 +95,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 Name = model.Name,
                 CreatedAt = model.CreatedAt,
                 UserId = model.UserId,
-                User = MapFromModel(model.User)
+                User = MapFromModel(model.User) != null ? MapFromModel(model.User) : null
             };
         }
 
@@ -108,7 +110,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 Name = entity.Name,
                 CreatedAt = entity.CreatedAt,
                 UserId = entity.UserId,
-                User = MapToModel(entity.User)
+                User = entity.User != null ? MapToModel(entity.User) : null
             };
         }
     }
