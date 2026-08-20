@@ -74,7 +74,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
 
         private async Task SaveItemAsync(ToDoItem item, CancellationToken ct)
         {
-            var userId = item.User.UserId;
+            var userId = item.UserId.UserId;
             string userFolder = GetUserFolder(userId);
             Directory.CreateDirectory(userFolder);
 
@@ -154,15 +154,15 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 item.Id = Guid.NewGuid();
 
             // Сохраняем файл
-            string userFolder = GetUserFolder(item.User.UserId);
+            string userFolder = GetUserFolder(item.UserId.UserId);
             Directory.CreateDirectory(userFolder);
-            string path = GetFilePath(item.User.UserId, item.Id);
+            string path = GetFilePath(item.UserId.UserId, item.Id);
             await using var stream = File.Create(path);
             await JsonSerializer.SerializeAsync(stream, item, _options, ct);
 
             // Обновляем индекс
             var index = await LoadIndexAsync();
-            index.ItemToUserMap[item.Id] = item.User.UserId;
+            index.ItemToUserMap[item.Id] = item.UserId.UserId;
             await SaveIndexAsync(index);
         }
         public async Task Update(ToDoItem item, CancellationToken ct)
