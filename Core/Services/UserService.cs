@@ -18,14 +18,23 @@ namespace FinalProjectCardList.Core.Services
         }
         public async Task<ToDoUser> RegisterUser(long telegramUserId, string telegramUserName, CancellationToken ct)
         {
-            ArgumentNullException.ThrowIfNull(telegramUserName, nameof(telegramUserName));
-            var userСurrent = new ToDoUser
+            var existingUser =
+    await _iUserRepository.GetUserByTelegramUserId(telegramUserId, ct);
+
+            if (existingUser != null)
+                return existingUser;
+
+            var user = new ToDoUser
             {
+                UserId = Guid.NewGuid(),
                 TelegramUserId = telegramUserId,
-                TelegramUserName = telegramUserName
+                TelegramUserName = telegramUserName,
+                RegisteredAt = DateTime.UtcNow
             };
-             _iUserRepository.Add(userСurrent, ct);
-            return await Task.FromResult(userСurrent);
+
+            await _iUserRepository.Add(user, ct);
+
+            return user;
         }
 
     }

@@ -277,24 +277,56 @@ namespace FinalProjectCardList.Core.TelegramBot
             // ─────────────────────────────────────────────
             if (callbackData == "addlist")
             {
-                // Ищем пользователя в базе. Если не найден — регистрируем нового
-                var toDoUser = await _userService.GetUserAsync(userId, ct)
-                    ?? await _userService.RegisterUser(userId, callbackQuery.From.Username, ct);
-                // Создаём новый контекст сценария AddList
-                var newContext = new ScenarioContext(ScenarioType.AddList);
-                // Сохраняем пользователя в контексте — сценарий будет его использовать
-                newContext.Context = toDoUser;
-                // Сохраняем контекст в репозитории — чтобы следующее сообщение попало в сценарий
+                var toDoUser = await _userService.GetUserAsync(userId, ct);
+
+                if (toDoUser == null)
+                {
+                    toDoUser = await _userService.RegisterUser(
+                        userId,
+                        callbackQuery.From.Username,
+                        ct);
+                }
+
+                if (toDoUser == null)
+                {
+                    await botClient.AnswerCallbackQuery(
+                        callbackQuery.Id,
+                        "Не удалось зарегистрировать пользователя",
+                        cancellationToken: ct);
+
+                    return;
+                }
+
+                if (toDoUser.UserId == Guid.Empty)
+                {
+                    await botClient.AnswerCallbackQuery(
+                        callbackQuery.Id,
+                        "У пользователя некорректный идентификатор",
+                        cancellationToken: ct);
+
+                    Console.WriteLine(
+                        $"Ошибка: RegisterUser вернул Guid.Empty. TelegramUserId={userId}");
+
+                    return;
+                }
+
+                var newContext = new ScenarioContext(ScenarioType.AddList)
+                {
+                    Context = toDoUser,
+                    CurrentStep = "Name"
+                };
+
                 await _contextRepository.SetContext(userId, newContext, ct);
-                // Просим пользователя ввести название нового списка
-                await botClient.SendMessage(callbackQuery.Message!.Chat.Id, "Введите название нового списка карт:", cancellationToken: ct);
-                // Устанавливаем шаг "Name" — следующее сообщение будет обработано как имя 
-                newContext.CurrentStep = "Name";
-                // Сохраняем обновлённый контекст с новым шагом
-                await _contextRepository.SetContext(userId, newContext, ct);
-                // Подтверждаем Telegram что callback обработан (убирает индикатор загрузки на кнопке)
-                await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
-                // Выходим — дальнейшая обработка не нужна
+
+                await botClient.SendMessage(
+                    callbackQuery.Message!.Chat.Id,
+                    "Введите название нового списка карт:",
+                    cancellationToken: ct);
+
+                await botClient.AnswerCallbackQuery(
+                    callbackQuery.Id,
+                    cancellationToken: ct);
+
                 return;
             }
 
