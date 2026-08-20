@@ -41,7 +41,7 @@ namespace FinalProjectCardList
                 UserService userService = new UserService(userRepo);
                 ToDoReportService toDoReportService = new ToDoReportService(toDoRepo);
                 ToDoService toDoService = new ToDoService(toDoRepo);
-                ToDoListService toDoListService = new ToDoListService(toDoListRepo, toDoService);
+                ToDoListService toDoListService = new ToDoListService(toDoListRepo, toDoService, userRepo);
 
                 var scenarios = new List<IScenario>
                 {

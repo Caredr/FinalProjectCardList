@@ -10,11 +10,16 @@ namespace FinalProjectCardList.Core.Services
         // Репозиторий сохраняет списки в файлы — данные не теряются при перезапуске
         private readonly IToDoListRepository _listRepository;
         private readonly IToDoService _todoService;
+        private readonly IUserRepository _userRepository;
 
-        public ToDoListService(IToDoListRepository listRepository, IToDoService todoService)
+        public ToDoListService(
+            IToDoListRepository listRepository,
+            IToDoService todoService,
+            IUserRepository userRepository)  // ← внедряем
         {
             _listRepository = listRepository ?? throw new ArgumentNullException(nameof(listRepository));
             _todoService = todoService ?? throw new ArgumentNullException(nameof(todoService));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
         public async Task<ToDoList> AddAsync(ToDoUser user, string name, CancellationToken ct)
@@ -24,7 +29,11 @@ namespace FinalProjectCardList.Core.Services
 
             if (name.Length > maxNameLength)
                 throw new ArgumentException($"Имя не должно быть больше {maxNameLength} букв.", nameof(name));
+            // ← ПРОВЕРКА: существует ли пользователь в БД
 
+            var existingUser = await _userRepository.GetUser(user.UserId, ct);
+            if (existingUser == null)
+                throw new InvalidOperationException($"Пользователь {user.UserId} не найден в БД");
             // Проверяем дубликат через репозиторий (файлы), а не Dictionary
             if (await _listRepository.ExistsByName(user.UserId, name, ct))
                 throw new ArgumentException($"Список с именем '{name}' уже существует.", nameof(name));
