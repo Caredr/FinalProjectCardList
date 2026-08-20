@@ -10,7 +10,7 @@ namespace FinalProjectCardList.Core.DataAccess.Models
     [Table("ToDoUser")]
     internal class ToDoUserModel
     {
-        [PrimaryKey, Identity, Column("UserId")]
+        [PrimaryKey,  Column("UserId")]
         public Guid UserId { get; set; }
         [Column("TelegramUserName"), NotNull]
         public string TelegramUserName { get; set; }
