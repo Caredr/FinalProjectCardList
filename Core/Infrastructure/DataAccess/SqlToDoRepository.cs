@@ -103,8 +103,8 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 .Set(i => i.State, updated.State)
                 .Set(i => i.StateChangedAt, updated.StateChangedAt)
                 .Set(i => i.Deadline, updated.Deadline)
-                .Set(i => i.User, updated.User)
-                .Set(i => i.List, updated.List)
+                .Set(i => i.UserId, updated.UserId)  // ← Guid, а не User
+                .Set(i => i.ListId, updated.ListId)  // ← Guid?, а не List
                 .Set(i => i.Quantity, updated.Quantity)
                 .UpdateAsync(ct);
         }
