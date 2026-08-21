@@ -429,20 +429,21 @@ namespace FinalProjectCardList.Core.TelegramBot
              context.CurrentStep == "SelectList" &&
                 callbackData.StartsWith("addtask_list"))
             {
-                // Получаем сценарий AddTask
-                var scenario = GetScenario(ScenarioType.AddTask);
+                // Убедитесь, что update содержит CallbackQuery
+                if (update.CallbackQuery == null)
+                {
+                    await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
+                    return;
+                }
 
-                // Сценарий сам обработает выбор списка в HandleCallbackQueryAsync
+                var scenario = GetScenario(ScenarioType.AddTask);
                 var result = await scenario.HandleMessageAsync(botClient, context, update, ct);
 
-                // Если сценарий завершился — сбрасываем контекст
                 if (result == ScenarioResult.Completed)
                     await _contextRepository.ResetContext(userId, ct);
                 else
-                    // Сохраняем контекст с новым шагом
                     await _contextRepository.SetContext(userId, context, ct);
 
-                // Подтверждаем обработку callback
                 await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
                 return;
             }
