@@ -425,18 +425,23 @@ namespace FinalProjectCardList.Core.TelegramBot
             // БЛОК 3: AddTask — пользователь выбрал список при добавлении задачи
             // Срабатывает когда активен сценарий AddTask на шаге "SelectList"
             // ─────────────────────────────────────────────
-            if (context?.CurrentScenario == ScenarioType.AddTask && context.CurrentStep == "SelectList" && callbackData.StartsWith("addtask_list"))
+            if (context?.CurrentScenario == ScenarioType.AddTask &&
+             context.CurrentStep == "SelectList" &&
+                callbackData.StartsWith("addtask_list"))
             {
                 // Получаем сценарий AddTask
                 var scenario = GetScenario(ScenarioType.AddTask);
-                // Передаём выбор списка в сценарий — он сохранит Id списка и попросит ввести название задачи
+
+                // Сценарий сам обработает выбор списка в HandleCallbackQueryAsync
                 var result = await scenario.HandleMessageAsync(botClient, context, update, ct);
+
                 // Если сценарий завершился — сбрасываем контекст
                 if (result == ScenarioResult.Completed)
                     await _contextRepository.ResetContext(userId, ct);
                 else
                     // Сохраняем контекст с новым шагом
                     await _contextRepository.SetContext(userId, context, ct);
+
                 // Подтверждаем обработку callback
                 await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
                 return;

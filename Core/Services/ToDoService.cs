@@ -34,8 +34,7 @@ namespace FinalProjectCardList.Core.Services
                 UserId = user,
                 Name = name,
                 ListId = list,
-                Deadline = deadLine == DateTime.MaxValue
-        ? null
+                Deadline = deadLine == DateTime.MaxValue ? null
         : deadLine,
                 Quantity = quantity,  // Установка количества
                 State = ToDoItemState.Active,
