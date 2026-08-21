@@ -1,8 +1,7 @@
 ﻿using FinalProjectCardList.Core.DataAccess.Models;
 using FinalProjectCardList.Core.Entities;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
-
 
 namespace FinalProjectCardList.Core.Infrastructure.DataAccess
 {
@@ -41,16 +40,23 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
-            return new ToDoItem
+            if (model.User == null)
+                throw new InvalidOperationException("User не может быть null для ToDoItem");
+
+            var entity = new ToDoItem
             {
                 Id = model.Id,
                 Name = model.Name,
+                UserId = MapFromModel(model.User),
+                ListId = model.List != null ? MapFromModel(model.List) : null,
                 CreatedAt = model.CreatedAt,
-                State = (ToDoItemState)model.State,
+                State = model.State,
                 StateChangedAt = model.StateChangedAt,
                 Deadline = model.Deadline,
                 Quantity = model.Quantity
             };
+
+            return entity;
         }
 
         public static ToDoItemModel MapToModel(ToDoItem entity)
@@ -72,14 +78,10 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 StateChangedAt = entity.StateChangedAt,
                 Deadline = entity.Deadline,
                 Quantity = entity.Quantity,
+                // Навигационные свойства
                 User = entity.UserId != null ? MapToModel(entity.UserId) : null,
                 List = entity.ListId != null ? MapToModel(entity.ListId) : null
             };
-            // если список есть — маппим навигационное свойство, если нет — оставляем null
-            if (entity.UserId != null)
-                model.User = MapToModel(entity.UserId);
-            if (entity.ListId != null)
-                model.List = MapToModel(entity.ListId);
 
             return model;
         }
@@ -95,7 +97,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 Name = model.Name,
                 CreatedAt = model.CreatedAt,
                 UserId = model.UserId,
-                User = MapFromModel(model.User) != null ? MapFromModel(model.User) : null
+                User = model.User != null ? MapFromModel(model.User) : null
             };
         }
 

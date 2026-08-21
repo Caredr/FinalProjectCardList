@@ -15,34 +15,28 @@ namespace FinalProjectCardList.Core.Services
         public readonly int TaskLengthLimitMax = 100;
         public readonly int TaskLengthLimitMin = 3;
 
-        public async Task<ToDoItem> AddAsync(ToDoUser user, string name, ToDoList? list, DateTime deadLine, int quantity, CancellationToken ct)
+        public async Task<ToDoItem> AddAsync(ToDoUser user,
+        string name,
+        ToDoList? list,
+        DateTime deadline,
+        int quantity,
+        CancellationToken ct)
         {
-            // Валидация: имя не пустое
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Название задачи не может быть пустым.", nameof(name));
-
-            // Валидация длины названия
-            if (name.Length < TaskLengthLimitMin)
-                throw new TaskLengthLimitException(name.Length, TaskLengthLimitMin);
-            if (name.Length > TaskLengthLimitMax)
-                throw new TaskLengthLimitException(name.Length, TaskLengthLimitMax);
-
-            // Создаём задачу с учётом списка и дедлайна
-            ToDoItem newTask = new()
+            var item = new ToDoItem
             {
                 Id = Guid.NewGuid(),
-                UserId = user,
+                UserId = user,  // ← ToDoUser
+                ListId = list,  // ← ToDoList?
                 Name = name,
-                ListId = list,
-                Deadline = deadLine == DateTime.MaxValue ? null
-        : deadLine,
-                Quantity = quantity,  // Установка количества
+                CreatedAt = DateTime.UtcNow,
                 State = ToDoItemState.Active,
-                StateChangedAt = DateTime.UtcNow
+                Deadline = deadline == DateTime.MaxValue ? null : deadline,
+                Quantity = quantity
             };
 
-            await _iToDoRepository.Add(newTask, ct);
-            return newTask;
+            await _iToDoRepository.Add(item, ct);
+
+            return item;
         }
         public async Task<IReadOnlyList<ToDoItem>> GetAllByUserIdAsync(Guid userId, CancellationToken ct)
         {
