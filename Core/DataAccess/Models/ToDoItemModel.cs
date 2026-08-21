@@ -14,8 +14,8 @@ namespace FinalProjectCardList.Core.DataAccess.Models
     [Table("ToDoItem")]
     internal class ToDoItemModel
     {
-        [Column("Id")]
-        [PrimaryKey]
+        [PrimaryKey, Column("Id")]
+   
         public Guid Id { get; set; }
         // Внешние ключи
         [Column("UserId")]
