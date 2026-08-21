@@ -131,7 +131,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                         await bot.SendMessage(
                             message.Chat.Id,
-                            "Введите название задачи:",
+                            "Введите количество:",
                             cancellationToken: ct);
 
                         context.CurrentStep = "Name";
@@ -190,11 +190,12 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                         var quantity = context.Data.TryGetValue("Quantity", out var qObj) && qObj is int q ? q : 1;
                         // Восстанавливаем выбранный список
                         ToDoList? list = null;
-                        if (context.Data.TryGetValue("ToDoList", out var listObj) &&
-                            listObj is ToDoList selectedList)
+
+                        if (context.Data.TryGetValue("SelectedListId", out var listIdObj) &&
+                            listIdObj is Guid listId &&
+                            listId != Guid.Empty)
                         {
-                            // Guid.Empty мы конвертируем в null ещё в CallbackQuery‑части
-                            list = selectedList;
+                            list = await _todoListService.GetAsync(listId, ct);
                         }
 
                         if (DateTime.TryParseExact(
@@ -283,19 +284,27 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                 return ScenarioResult.Transition;
             }
 
-            // Получаем ToDoList по Guid из FileToDoListRepository
-            ToDoList? list = null;
-            
-            if (dto.ToDoListId != Guid.Empty)
+            if (dto.ToDoListId == Guid.Empty)
             {
-                list = await _todoListService.GetAsync(dto.ToDoListId, ct);
+                // Пользователь выбрал «Без списка»
+                context.Data.Remove("SelectedListId");
             }
-
-            // Сохраняем сам ToDoList (а не Guid), чтобы потом отдать в AddAsync
-            if (list != null)
-                context.Data["ToDoList"] = list;
             else
-                context.Data.Remove("ToDoList"); // "без списка"
+            {
+                var list = await _todoListService.GetAsync(dto.ToDoListId, ct);
+
+                if (list == null)
+                {
+                    await bot.AnswerCallbackQuery(
+                        callbackQuery.Id,
+                        "Список не найден",
+                        cancellationToken: ct);
+
+                    return ScenarioResult.Transition;
+                }
+
+                context.Data["SelectedListId"] = dto.ToDoListId;  // ← ВАЖНО!
+            }
 
             var chatId = callbackQuery.Message!.Chat.Id;
 
