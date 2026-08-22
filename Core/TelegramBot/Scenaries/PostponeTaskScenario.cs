@@ -39,13 +39,11 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
         {
             ct.ThrowIfCancellationRequested();
 
-            // 1. Обработка inline-callback (выбор задачи или списка)
             if (update.CallbackQuery is { } callbackQuery)
             {
                 return await HandleCallbackQueryAsync(bot, context, callbackQuery, ct);
             }
 
-            // 2. Обычное сообщение
             if (update.Message is not { } message)
                 return ScenarioResult.Completed;
 
@@ -61,7 +59,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
 
             switch (context.CurrentStep)
             {
-                // Шаг 0: показываем все активные задачи пользователя
                 case null:
                     {
                         var allTasks = await _todoService.GetAllByUserIdAsync(user.UserId, ct);
@@ -85,15 +82,15 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                                 Action = "postpone_task",
                                 ToDoItemId = task.Id
                             };
-                            var callbackData = taskDto.ToString();  // ← Исправлено
+                            var callbackData = taskDto.ToString();
                             if (callbackData.Length > 64)
                                 callbackData = callbackData[..64];
 
                             string taskLabel = BuildTaskLabel(task);
                             rows.Add(new[]
                             {
-        InlineKeyboardButton.WithCallbackData(taskLabel, callbackData)
-    });
+                                InlineKeyboardButton.WithCallbackData(taskLabel, callbackData)
+                            });
                         }
 
                         var markup = new InlineKeyboardMarkup(rows);
@@ -131,6 +128,8 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
             var userId = callbackQuery.From.Id;
             var user = context.Context as ToDoUser;
 
+            Console.WriteLine($"[PostponeTaskScenario] Callback: {data}, Step: {context.CurrentStep}");
+
             if (user == null)
             {
                 await bot.AnswerCallbackQuery(
@@ -141,14 +140,20 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
             }
 
             // Обработка выбора задачи
-            if (data.StartsWith("postpone_task"))
+            var callbackTaskDto = ToDoItemCallbackDto.FromString(data);
+
+            if (callbackTaskDto.Action == "postpone_task")
             {
-                var taskDto = ToDoItemCallbackDto.FromString(data);  // ← Исправлено имя
-                var taskId = taskDto.ToDoItemId;
+                Console.WriteLine("[PostponeTaskScenario] Выбор задачи");
+
+                var taskId = callbackTaskDto.ToDoItemId;
+
+                Console.WriteLine($"[PostponeTaskScenario] TaskId: {taskId}");
 
                 var task = await _todoService.Get(taskId, ct);
                 if (task == null)
                 {
+                    Console.WriteLine($"[PostponeTaskScenario] Задача не найдена: {taskId}");
                     await bot.AnswerCallbackQuery(
                         callbackQuery.Id,
                         "Задача не найдена",
@@ -156,46 +161,47 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                     return ScenarioResult.Completed;
                 }
 
-                // Сохраняем ID задачи
                 context.Data["SelectedTaskId"] = taskId;
+                Console.WriteLine($"[PostponeTaskScenario] Сохранено SelectedTaskId: {taskId}");
 
-                // Показываем списки для выбора
                 var lists = await _todoListService.GetUserListsAsync(user.UserId, ct);
+                Console.WriteLine($"[PostponeTaskScenario] Найдено списков: {lists.Count}");
+
                 var rows = new List<IEnumerable<InlineKeyboardButton>>();
 
-                // Опция "Без списка"
                 var noListDto = new ToDoListCallbackDto
                 {
                     Action = "postpone_list",
                     ToDoListId = Guid.Empty
                 };
-                var noListData = ToDoListCallbackDto.ToString(noListDto);
+                var noListData = noListDto.ToString();
                 rows.Add(new[]
                 {
                     InlineKeyboardButton.WithCallbackData("📌 Без списка", noListData)
                 });
 
-                // Списки пользователя
                 foreach (var list in lists)
                 {
-                    var listDto = new ToDoListCallbackDto  // ← Исправлено имя
+                    var listDto = new ToDoListCallbackDto
                     {
                         Action = "postpone_list",
                         ToDoListId = list.Id
                     };
-                    var callbackData = ToDoListCallbackDto.ToString(listDto);  // ← Исправлено
-                    if (callbackData.Length > 64)
-                        callbackData = callbackData[..64];
+                    var listCallbackData = listDto.ToString();
+                    if (listCallbackData.Length > 64)
+                        listCallbackData = listCallbackData[..64];
 
                     rows.Add(new[]
                     {
-                        InlineKeyboardButton.WithCallbackData(list.Name ?? "(без имени)", callbackData)
+                        InlineKeyboardButton.WithCallbackData(list.Name ?? "(без имени)", listCallbackData)
                     });
                 }
 
                 var markup = new InlineKeyboardMarkup(rows);
 
-                string currentListName = task.ListId != null ? task.ListId.Name : "Без списка";
+                string currentListName = task.ListId?.Name ?? "Без списка";
+
+                Console.WriteLine($"[PostponeTaskScenario] Отправляем списки, текущий: {currentListName}");
 
                 await bot.SendMessage(
                     callbackQuery.Message!.Chat.Id,
@@ -207,16 +213,23 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                     replyMarkup: markup);
 
                 context.CurrentStep = "SelectList";
+                Console.WriteLine($"[PostponeTaskScenario] Установлен шаг: {context.CurrentStep}");
+
                 await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
                 return ScenarioResult.Transition;
             }
 
             // Обработка выбора списка
-            if (data.StartsWith("postpone_list"))
+            var callbackListDto = ToDoListCallbackDto.FromString(data);
+
+            if (callbackListDto.Action == "postpone_list")
             {
+                Console.WriteLine("[PostponeTaskScenario] Выбор списка");
+
                 if (!context.Data.TryGetValue("SelectedTaskId", out var taskIdObj) ||
                     taskIdObj is not Guid taskId)
                 {
+                    Console.WriteLine("[PostponeTaskScenario] Задача не выбрана");
                     await bot.AnswerCallbackQuery(
                         callbackQuery.Id,
                         "Ошибка: задача не выбрана",
@@ -224,8 +237,9 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                     return ScenarioResult.Completed;
                 }
 
-                var listDto = ToDoListCallbackDto.FromString(data);  // ← Исправлено имя
-                var listId = listDto.ToDoListId;
+                var listId = callbackListDto.ToDoListId;
+
+                Console.WriteLine($"[PostponeTaskScenario] ListId: {listId}");
 
                 ToDoList? targetList = null;
                 if (listId != Guid.Empty)
@@ -233,6 +247,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                     targetList = await _todoListService.GetAsync(listId, ct);
                     if (targetList == null)
                     {
+                        Console.WriteLine($"[PostponeTaskScenario] Список не найден: {listId}");
                         await bot.AnswerCallbackQuery(
                             callbackQuery.Id,
                             "Список не найден",
@@ -241,8 +256,8 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                     }
                 }
 
-                // Переносим задачу
                 await _todoService.MoveTaskToListAsync(taskId, targetList, ct);
+                Console.WriteLine($"[PostponeTaskScenario] Задача {taskId} перенесена в {targetList?.Name ?? "Без списка"}");
 
                 string listName = targetList?.Name ?? "Без списка";
 
@@ -262,6 +277,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                 return ScenarioResult.Completed;
             }
 
+            Console.WriteLine($"[PostponeTaskScenario] Неизвестный callback: {data}");
             await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
             return ScenarioResult.Transition;
         }

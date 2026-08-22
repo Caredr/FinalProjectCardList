@@ -1,5 +1,4 @@
 using FinalProjectCardList.Core.BackgroundTasks;
-using FinalProjectCardList.Core.BackgroundTasks;
 using FinalProjectCardList.Core.DataAccess;
 using FinalProjectCardList.Core.Exeptions;
 using FinalProjectCardList.Core.Infrastructure;
@@ -102,6 +101,7 @@ namespace FinalProjectCardList
                     new BotCommand { Command = "show", Description = "Списки и задачи (с выполненными)" },
                     new BotCommand { Command = "report", Description = "Статистика по задачам" },
                     new BotCommand { Command = "find", Description = "Поиск задач по имени" },
+                    new BotCommand { Command = "postpone", Description = "Перенести задачу в другой список" },
                     new BotCommand { Command = "cancel", Description = "Отмена текущего ввода" },
                 }, cancellationToken: token);
 

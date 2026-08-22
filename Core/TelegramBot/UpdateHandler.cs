@@ -245,50 +245,41 @@ namespace FinalProjectCardList.Core.TelegramBot
                             }
                             break;
                         }
-                    case string p when p.StartsWith("/postpone"):
+                    case string p when p.Equals("/postpone", StringComparison.OrdinalIgnoreCase):
                         {
-                            // Извлекаем Guid из команды (если есть)
-                            var idPart = commandEater.Length > "/postpone ".Length
-                                ? commandEater["/postpone ".Length..].Trim()
-                                : string.Empty;
-
-                            if (!string.IsNullOrWhiteSpace(idPart) && Guid.TryParse(idPart, out taskId))
+                            var postponeContext = new ScenarioContext(ScenarioType.PostponeTask)
                             {
-                                // Если ID указан сразу - начинаем сценарий с этим ID
-                                context = new ScenarioContext(ScenarioType.PostponeTask);
-                                context.Context = toDoUser;
-                                context.Data["SelectedTaskId"] = taskId;
-                                await _contextRepository.SetContext(update.Message.From.Id, context, ct);
+                                Context = toDoUser,
+                                CurrentStep = null
+                            };
 
-                                await SendCancelKeyboard(botClient, update.Message.Chat.Id,
-                                    "Выберите список для переноса задачи:", ct);
+                            await _contextRepository.SetContext(
+                                update.Message!.From!.Id,
+                                postponeContext,
+                                ct);
 
-                                var scenario = GetScenario(ScenarioType.PostponeTask);
-                                var result = await scenario.HandleMessageAsync(botClient, context, update, ct);
+                            var scenario = GetScenario(ScenarioType.PostponeTask);
 
-                                if (result == ScenarioResult.Completed)
-                                    await _contextRepository.ResetContext(update.Message.From.Id, ct);
-                                else
-                                    await _contextRepository.SetContext(update.Message.From.Id, context, ct);
+                            var result = await scenario.HandleMessageAsync(
+                                botClient,
+                                postponeContext,
+                                update,
+                                ct);
+
+                            if (result == ScenarioResult.Completed)
+                            {
+                                await _contextRepository.ResetContext(
+                                    update.Message.From.Id,
+                                    ct);
                             }
                             else
                             {
-                                // Если ID не указан - запускаем сценарий выбора задачи
-                                context = new ScenarioContext(ScenarioType.PostponeTask);
-                                context.Context = toDoUser;
-                                await _contextRepository.SetContext(update.Message.From.Id, context, ct);
-
-                                await SendCancelKeyboard(botClient, update.Message.Chat.Id,
-                                    "Выберите задачу для переноса:", ct);
-
-                                var scenario = GetScenario(ScenarioType.PostponeTask);
-                                var result = await scenario.HandleMessageAsync(botClient, context, update, ct);
-
-                                if (result == ScenarioResult.Completed)
-                                    await _contextRepository.ResetContext(update.Message.From.Id, ct);
-                                else
-                                    await _contextRepository.SetContext(update.Message.From.Id, context, ct);
+                                await _contextRepository.SetContext(
+                                    update.Message.From.Id,
+                                    postponeContext,
+                                    ct);
                             }
+
                             break;
                         }
                     default:
@@ -723,6 +714,44 @@ namespace FinalProjectCardList.Core.TelegramBot
             // Если ни один блок не обработал callback — просто подтверждаем его
             // чтобы убрать индикатор загрузки на кнопке у пользователя
             // ─────────────────────────────────────────────
+            // PostponeTask: выбор задачи или списка
+            if (context?.CurrentScenario == ScenarioType.PostponeTask &&
+                (callbackData.StartsWith("postpone_task") ||
+                 callbackData.StartsWith("postpone_list")))
+            {
+                var scenario = GetScenario(ScenarioType.PostponeTask);
+
+                var result = await scenario.HandleMessageAsync(
+                    botClient,
+                    context,
+                    update,
+                    ct);
+
+                if (result == ScenarioResult.Completed)
+                {
+                    await _contextRepository.ResetContext(userId, ct);
+
+                    await SendMainKeyboard(
+                        botClient,
+                        callbackQuery.Message!.Chat.Id,
+                        "Главное меню:",
+                        ct);
+                }
+                else
+                {
+                    await _contextRepository.SetContext(
+                        userId,
+                        context,
+                        ct);
+                }
+
+                // ВАЖНО:
+                // PostponeTaskScenario сам вызывает AnswerCallbackQuery.
+                // Поэтому здесь повторно его не вызываем.
+
+                return;
+            }
+
             await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
         }
 
