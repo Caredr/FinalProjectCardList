@@ -296,22 +296,14 @@ namespace FinalProjectCardList.Core.TelegramBot
         // Метод обрабатывает все нажатия на инлайн-кнопки от пользователя
         private async Task HandleCallbackQueryAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
         {
-            // Если в апдейте нет CallbackQuery — выходим, обрабатывать нечего
             if (update.CallbackQuery == null)
                 return;
-            // Сохраняем CallbackQuery в переменную для удобного обращения
             var callbackQuery = update.CallbackQuery;
-            // Получаем Telegram ID пользователя, который нажал кнопку
             var userId = callbackQuery.From.Id;
-            // Получаем строку данных кнопки (то, что передаётся в WithCallbackData)
-            // Если данных нет — используем пустую строку чтобы не получить null
-            var callbackData = callbackQuery.Data ?? string.Empty;
 
-            // ─────────────────────────────────────────────
-            // БЛОК 0: Запуск сценариев AddList / DeleteList
-            // Эти кнопки нажимаются когда у пользователя нет активного сценария,
-            // поэтому обрабатываем их первыми — до загрузки контекста
-            // ─────────────────────────────────────────────
+            var callbackData = callbackQuery.Data ?? string.Empty;
+            Console.WriteLine($"[UpdateHandler] Callback: {callbackData}, UserId: {userId}");
+
             if (callbackData == "addlist")
             {
                 var toDoUser = await _userService.GetUserAsync(userId, ct);
@@ -715,10 +707,10 @@ namespace FinalProjectCardList.Core.TelegramBot
             // чтобы убрать индикатор загрузки на кнопке у пользователя
             // ─────────────────────────────────────────────
             // PostponeTask: выбор задачи или списка
-            if (context?.CurrentScenario == ScenarioType.PostponeTask &&
-                (callbackData.StartsWith("postpone_task") ||
-                 callbackData.StartsWith("postpone_list")))
+            if (context?.CurrentScenario == ScenarioType.PostponeTask)
             {
+                Console.WriteLine($"[UpdateHandler] PostponeTask callback: {callbackData}");
+
                 var scenario = GetScenario(ScenarioType.PostponeTask);
 
                 var result = await scenario.HandleMessageAsync(
@@ -745,7 +737,6 @@ namespace FinalProjectCardList.Core.TelegramBot
                         ct);
                 }
 
-                // ВАЖНО:
                 // PostponeTaskScenario сам вызывает AnswerCallbackQuery.
                 // Поэтому здесь повторно его не вызываем.
 
