@@ -107,13 +107,18 @@ namespace FinalProjectCardList.Core.Services
             }).ToList();
             return filtered.AsReadOnly();
         }
-        public async Task MoveTaskToListAsync(Guid id, ToDoList? targetList, CancellationToken ct)
+        public async Task MoveTaskToListAsync(
+    Guid taskId,
+    ToDoList? targetList,
+    CancellationToken ct)
         {
-            var task = await Get(id, ct);
+            var task = await Get(taskId, ct);
+
             if (task == null)
-                throw new InvalidOperationException("Задача не найдена");
+                throw new InvalidOperationException("Задача не найдена.");
 
             task.ListId = targetList;
+
             await _iToDoRepository.Update(task, ct);
         }
         private static void ParseAndValidateInt(string? str, int min, int max)
