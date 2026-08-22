@@ -82,15 +82,15 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                                 Action = "postpone_task",
                                 ToDoItemId = task.Id
                             };
-                            var callbackData = taskDto.ToString();
+                            var callbackData = taskDto.ToString();  // ← Метод экземпляра
                             if (callbackData.Length > 64)
                                 callbackData = callbackData[..64];
 
                             string taskLabel = BuildTaskLabel(task);
                             rows.Add(new[]
                             {
-                                InlineKeyboardButton.WithCallbackData(taskLabel, callbackData)
-                            });
+        InlineKeyboardButton.WithCallbackData(taskLabel, callbackData)
+    });
                         }
 
                         var markup = new InlineKeyboardMarkup(rows);
@@ -174,7 +174,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                     Action = "postpone_list",
                     ToDoListId = Guid.Empty
                 };
-                var noListData = noListDto.ToString();
+                var noListData = ToDoListCallbackDto.ToString(noListDto);
                 rows.Add(new[]
                 {
                     InlineKeyboardButton.WithCallbackData("📌 Без списка", noListData)
@@ -187,14 +187,14 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                         Action = "postpone_list",
                         ToDoListId = list.Id
                     };
-                    var listCallbackData = listDto.ToString();
+                    var listCallbackData = ToDoListCallbackDto.ToString(listDto);
                     if (listCallbackData.Length > 64)
                         listCallbackData = listCallbackData[..64];
 
                     rows.Add(new[]
                     {
-                        InlineKeyboardButton.WithCallbackData(list.Name ?? "(без имени)", listCallbackData)
-                    });
+        InlineKeyboardButton.WithCallbackData(list.Name ?? "(без имени)", listCallbackData)
+    });
                 }
 
                 var markup = new InlineKeyboardMarkup(rows);
