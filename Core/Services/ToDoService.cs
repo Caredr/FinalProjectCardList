@@ -1,6 +1,7 @@
 ﻿using FinalProjectCardList.Core.DataAccess;
 using FinalProjectCardList.Core.Entities;
 using FinalProjectCardList.Core.Exeptions;
+using System;
 
 namespace FinalProjectCardList.Core.Services
 {
@@ -105,6 +106,15 @@ namespace FinalProjectCardList.Core.Services
                 return listMatch && stateMatch;
             }).ToList();
             return filtered.AsReadOnly();
+        }
+        public async Task MoveTaskToListAsync(Guid id, ToDoList? targetList, CancellationToken ct)
+        {
+            var task = await Get(id, ct);
+            if (task == null)
+                throw new InvalidOperationException("Задача не найдена");
+
+            task.ListId = targetList;
+            await _iToDoRepository.Update(task, ct);
         }
         private static void ParseAndValidateInt(string? str, int min, int max)
         {

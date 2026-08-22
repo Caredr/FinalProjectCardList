@@ -1,4 +1,5 @@
 using FinalProjectCardList.Core.BackgroundTasks;
+using FinalProjectCardList.Core.BackgroundTasks;
 using FinalProjectCardList.Core.DataAccess;
 using FinalProjectCardList.Core.Exeptions;
 using FinalProjectCardList.Core.Infrastructure;
@@ -6,12 +7,12 @@ using FinalProjectCardList.Core.Infrastructure.DataAccess;
 using FinalProjectCardList.Core.Services;
 using FinalProjectCardList.Core.TelegramBot;
 using FinalProjectCardList.Core.TelegramBot.Scenaries;
+using FinalProjectCardList.Core.TelegramBot.Scenarios;
 using FinalProjectCardList.Infrastructure.BackgroundTasks;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using FinalProjectCardList.Core.BackgroundTasks;
 
 namespace FinalProjectCardList
 {
@@ -50,6 +51,7 @@ namespace FinalProjectCardList
                     new DeleteListScenario(userService, toDoListService),
                     new ShowTasksScenario(toDoService, userService),
                     new DeleteTaskScenario(userService, toDoService, toDoListService),
+                    new PostponeTaskScenario(userService, toDoService, toDoListService)
                 };
 
                 InMemoryScenarioContextRepository contextRepo = new();
