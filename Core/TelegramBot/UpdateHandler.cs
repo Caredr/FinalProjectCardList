@@ -245,6 +245,52 @@ namespace FinalProjectCardList.Core.TelegramBot
                             }
                             break;
                         }
+                    case string p when p.StartsWith("/postpone"):
+                        {
+                            // Извлекаем Guid из команды (если есть)
+                            var idPart = commandEater.Length > "/postpone ".Length
+                                ? commandEater["/postpone ".Length..].Trim()
+                                : string.Empty;
+
+                            if (!string.IsNullOrWhiteSpace(idPart) && Guid.TryParse(idPart, out taskId))
+                            {
+                                // Если ID указан сразу - начинаем сценарий с этим ID
+                                context = new ScenarioContext(ScenarioType.PostponeTask);
+                                context.Context = toDoUser;
+                                context.Data["SelectedTaskId"] = taskId;
+                                await _contextRepository.SetContext(update.Message.From.Id, context, ct);
+
+                                await SendCancelKeyboard(botClient, update.Message.Chat.Id,
+                                    "Выберите список для переноса задачи:", ct);
+
+                                var scenario = GetScenario(ScenarioType.PostponeTask);
+                                var result = await scenario.HandleMessageAsync(botClient, context, update, ct);
+
+                                if (result == ScenarioResult.Completed)
+                                    await _contextRepository.ResetContext(update.Message.From.Id, ct);
+                                else
+                                    await _contextRepository.SetContext(update.Message.From.Id, context, ct);
+                            }
+                            else
+                            {
+                                // Если ID не указан - запускаем сценарий выбора задачи
+                                context = new ScenarioContext(ScenarioType.PostponeTask);
+                                context.Context = toDoUser;
+                                await _contextRepository.SetContext(update.Message.From.Id, context, ct);
+
+                                await SendCancelKeyboard(botClient, update.Message.Chat.Id,
+                                    "Выберите задачу для переноса:", ct);
+
+                                var scenario = GetScenario(ScenarioType.PostponeTask);
+                                var result = await scenario.HandleMessageAsync(botClient, context, update, ct);
+
+                                if (result == ScenarioResult.Completed)
+                                    await _contextRepository.ResetContext(update.Message.From.Id, ct);
+                                else
+                                    await _contextRepository.SetContext(update.Message.From.Id, context, ct);
+                            }
+                            break;
+                        }
                     default:
                         await botClient.SendMessage(update.Message.Chat, "Ошибка, введите доступную команду");
                         break;
@@ -891,6 +937,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                 "\n /find - Найти по имени" +
                 "\n /removetask - удалить карту" +
                 "\n /completetask - поставить статус - Completed" +
+                "\n /postpone - перенести задачу в другой список" +
                 "\n /cancel  - отмена текущего ввода");
         }
 

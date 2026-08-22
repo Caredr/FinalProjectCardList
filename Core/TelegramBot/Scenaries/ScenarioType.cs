@@ -8,6 +8,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 {
     public enum ScenarioType // типы сценариев
     {
-        None, AddTask, AddList, DeleteList, ShowTasks, DeleteTask
+        None, AddTask, AddList, DeleteList, ShowTasks, DeleteTask, PostponeTask
     }
 }
