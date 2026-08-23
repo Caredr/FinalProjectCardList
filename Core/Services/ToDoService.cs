@@ -19,7 +19,7 @@ namespace FinalProjectCardList.Core.Services
         public async Task<ToDoItem> AddAsync(ToDoUser user,
         string name,
         ToDoList? list,
-        DateTime deadline,
+        DateTime? deadline,
         int quantity,
         CancellationToken ct)
         {

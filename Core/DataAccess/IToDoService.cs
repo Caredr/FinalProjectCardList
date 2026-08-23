@@ -11,7 +11,7 @@ namespace FinalProjectCardList.Core.DataAccess
     {
         Task<IReadOnlyList<ToDoItem>> FindAsync(ToDoUser user, string namePrefix, CancellationToken ct);
         Task<IReadOnlyList<ToDoItem>> GetAllByUserIdAsync(Guid userId, CancellationToken ct);
-        Task<ToDoItem> AddAsync(ToDoUser user, string name, ToDoList? list, DateTime deadLine, int quantity, CancellationToken ct);
+        Task<ToDoItem> AddAsync(ToDoUser user, string name, ToDoList? list, DateTime? deadline, int quantity, CancellationToken ct);
         Task MarkCompletedAsync(Guid id, CancellationToken ct);
         Task DeleteAsync(Guid id, CancellationToken ct);
         Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct, ToDoItemState? stateFilter = null); 
