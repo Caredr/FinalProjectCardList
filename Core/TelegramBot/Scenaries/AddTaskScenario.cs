@@ -61,11 +61,9 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                             user = await _userService.RegisterUser(message.Chat.Id, message.From?.Username, ct);
                             context.Context = user;
                         }
-
+                        context.Data["ChatId"] = message.Chat.Id;
                         var lists = await _todoListService.GetUserListsAsync(user.UserId, ct);
-
                         var rows = new List<IEnumerable<InlineKeyboardButton>>();
-
                         var noListDto = new ToDoListCallbackDto
                         {
                             Action = "addtask_list",
@@ -279,15 +277,17 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
         }
 
         private async Task CreateTaskAsync(
-     ITelegramBotClient bot,
-     ScenarioContext context,
-     ToDoUser user,
-     CancellationToken ct)
+    ITelegramBotClient bot,
+    ScenarioContext context,
+    ToDoUser user,
+    CancellationToken ct)
         {
             var taskName = context.Data["TaskName"] as string;
             var scryfallSet = context.Data.TryGetValue("ScryfallSet", out var setObj) ? setObj as string : null;
             var scryfallCollectorNumber = context.Data.TryGetValue("ScryfallCollectorNumber", out var numObj) ? numObj as string : null;
             var quantity = context.Data.TryGetValue("Quantity", out var qObj) && qObj is int q ? q : 1;
+
+            Console.WriteLine($"[CreateTaskAsync] Task: {taskName}, Set: {scryfallSet}, Number: {scryfallCollectorNumber}");
 
             ScryfallCard? card = null;
             if (!string.IsNullOrEmpty(scryfallSet) && !string.IsNullOrEmpty(scryfallCollectorNumber))
@@ -297,6 +297,8 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                     scryfallSet,
                     scryfallCollectorNumber,
                     ct);
+
+                Console.WriteLine($"[CreateTaskAsync] Scryfall API: {card?.Name}, Usd: {card?.Usd}");
             }
             else if (!string.IsNullOrEmpty(taskName))
             {
@@ -319,13 +321,26 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                 quantity,
                 ct);
 
+            Console.WriteLine($"[CreateTaskAsync] After AddAsync: {item.Id}, ListId: {item.ListId?.Id}");
+
             if (card != null && card.Usd.HasValue)
             {
+                Console.WriteLine($"[CreateTaskAsync] Before Update: {item.Name}, Usd: {item.LastPriceUsd}");
+
                 item.ScryfallSet = scryfallSet;
                 item.ScryfallCollectorNumber = scryfallCollectorNumber;
                 item.LastPriceUsd = card.Usd;
                 item.LastPriceCheckedAt = DateTime.UtcNow;
+
+                Console.WriteLine($"[CreateTaskAsync] After assignment: Usd={item.LastPriceUsd}, Set={item.ScryfallSet}, Number={item.ScryfallCollectorNumber}");
+
                 await _todoService.Update(item, ct);
+
+                Console.WriteLine($"[CreateTaskAsync] After Update call: {item.Name}, Usd: {item.LastPriceUsd}");
+            }
+            else
+            {
+                Console.WriteLine($"[CreateTaskAsync] Skip Update: card={card?.Name}, Usd={card?.Usd}");
             }
 
             string cardInfo = !string.IsNullOrEmpty(scryfallSet) && !string.IsNullOrEmpty(scryfallCollectorNumber)
@@ -335,20 +350,21 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             string priceText = card?.Usd != null ? $"\n💰 Цена: ${card.Usd:N2}" : "";
             string quantityText = quantity > 1 ? $"\nКоличество: {quantity}x" : "";
 
-            // Получите ChatId из context.Data
             if (!context.Data.TryGetValue("ChatId", out var chatIdObj) || chatIdObj is not long chatId)
             {
-                // Заглушка, если ChatId не найден
-                chatId = 0;
+                Console.WriteLine("[CreateTaskAsync] ChatId not found in context.Data");
+                return;
             }
 
             await bot.SendMessage(
-                chatId,  // ← Теперь это long (ChatId)
+                chatId,
                 $"✅ Карта создана!" +
                 $"\n{taskName}{cardInfo}" +
                 quantityText +
                 priceText,
                 cancellationToken: ct);
+
+            Console.WriteLine($"[CreateTaskAsync] Message sent to {chatId}");
 
             context.CurrentStep = null;
             context.Data.Clear();

@@ -82,7 +82,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                                 Action = "postpone_task",
                                 ToDoItemId = task.Id
                             };
-                            var callbackData = taskDto.ToString();  // ← Метод экземпляра
+                            var callbackData = taskDto.ToString();  
                             if (callbackData.Length > 64)
                                 callbackData = callbackData[..64];
 
@@ -139,7 +139,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                 return ScenarioResult.Completed;
             }
 
-            // Обработка выбора задачи
             var callbackTaskDto = ToDoItemCallbackDto.FromString(data);
 
             if (callbackTaskDto.Action == "postpone_task")
@@ -219,7 +218,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                 return ScenarioResult.Transition;
             }
 
-            // Обработка выбора списка
             var callbackListDto = ToDoListCallbackDto.FromString(data);
 
             if (callbackListDto.Action == "postpone_list")

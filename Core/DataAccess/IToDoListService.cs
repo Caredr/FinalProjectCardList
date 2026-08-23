@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.DataAccess
 {
-    internal interface IToDoListService // Сервис для работы с бизнес-логикой,
-                                        // связанной со списками дел.
-                                        // Он использует IToDoListRepository для взаимодействия с данными и предоставляет методы
-                                        // для создания, получения, удаления и получения списков дел для пользователей.
+    internal interface IToDoListService 
+                                       
     {
-        Task<ToDoList> AddAsync(ToDoUser user, string name, CancellationToken ct); // Метод для создания нового списка дел. Принимает пользователя, которому принадлежит список, и имя списка.
+        Task<ToDoList> AddAsync(ToDoUser user, string name, CancellationToken ct);
         Task<ToDoList?> GetAsync(Guid id, CancellationToken ct);
         Task DeleteAsync(Guid id, CancellationToken ct);
         Task<IReadOnlyList<ToDoList>> GetUserListsAsync(Guid userId, CancellationToken ct);

@@ -31,7 +31,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 .ToListAsync(ct);
 
             return models
-                .Select(ModelMapper.MapFromModel)
+                .Select(ModelMapper.MapFromModel)  
                 .ToList();
         }
 

@@ -22,10 +22,6 @@ namespace FinalProjectCardList.Core.BackgroundTasks
                     Console.WriteLine($"{name}. Start delay {delay}");
                     await Task.Delay(delay, ct);
                 }
-                catch (OperationCanceledException) when (ct.IsCancellationRequested)
-                {
-                    // нормально завершаемся при отмене
-                }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"{name}. Error: {ex}");

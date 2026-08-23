@@ -23,7 +23,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         private readonly string _indexPath;
         private readonly JsonSerializerOptions _options = new() { WriteIndented = true };
 
-        private async Task InitializeAsync() // Создаем индекс
+        private async Task InitializeAsync() 
         {
             try
             {
@@ -31,21 +31,20 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
             }
             catch (Exception ex)
             {
-                // Логируем, но не падаем при старте
                 Console.WriteLine($"Index init failed: {ex.Message}");
             }
         }
 
         private async Task EnsureIndexExistsAsync()
         {
-            if (!File.Exists(_indexPath)) // index.json отсутствует?
+            if (!File.Exists(_indexPath)) 
             {
-                var index = new ToDoIndex();    // Создаем пустой
-                await ScanAndBuildIndexAsync(index); // Сканируем файлы
-                await SaveIndexAsync(index);  // Сохраняем
+                var index = new ToDoIndex();   
+                await ScanAndBuildIndexAsync(index); 
+                await SaveIndexAsync(index);
             }
         }
-        private Task ScanAndBuildIndexAsync(ToDoIndex index, CancellationToken ct = default) // СКАНИРОВАНИЕ файловой системы
+        private Task ScanAndBuildIndexAsync(ToDoIndex index, CancellationToken ct = default)
         {
             var userFolders = Directory.GetDirectories(_basePath);
             foreach (string userFolder in userFolders)
@@ -153,14 +152,11 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
             if (item.Id == Guid.Empty) 
                 item.Id = Guid.NewGuid();
 
-            // Сохраняем файл
             string userFolder = GetUserFolder(item.UserId.UserId);
             Directory.CreateDirectory(userFolder);
             string path = GetFilePath(item.UserId.UserId, item.Id);
             await using var stream = File.Create(path);
             await JsonSerializer.SerializeAsync(stream, item, _options, ct);
-
-            // Обновляем индекс
             var index = await LoadIndexAsync();
             index.ItemToUserMap[item.Id] = item.UserId.UserId;
             await SaveIndexAsync(index);
@@ -175,12 +171,11 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             var index = await LoadIndexAsync();
             if (!index.ItemToUserMap.TryGetValue(itemId, out Guid userId))
-                return;  // Не найдено
+                return;
 
             string path = GetFilePath(userId, itemId);
             if (File.Exists(path)) File.Delete(path);
 
-            // Удаляем из индекса
             index.ItemToUserMap.Remove(itemId);
             await SaveIndexAsync(index);
         }

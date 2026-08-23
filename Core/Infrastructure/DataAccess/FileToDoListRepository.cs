@@ -4,10 +4,6 @@ using System.Text.Json;
 
 namespace FinalProjectCardList.Core.Infrastructure.DataAccess
 {
-    /// <summary>
-    /// Хранит списки задач в файловой системе.
-    /// Каждый список — отдельный JSON-файл: data/lists/{userId}/{listId}.json
-    /// </summary>
     internal class FileToDoListRepository : IToDoListRepository
     {
         private readonly string _basePath;

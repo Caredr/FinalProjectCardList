@@ -8,10 +8,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 {
-    /// <summary>
-    /// Показывает задачи выбранного списка.
-    /// Каждая задача — отдельное сообщение с кнопками "Выполнить" и "Удалить".
-    /// </summary>
+
     internal class ShowTasksScenario : IScenario
     {
         private readonly IToDoService _todoService;
@@ -48,16 +45,12 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             {
                 return ScenarioResult.Completed;
             }
-
-            // Загружаем пользователя
             if (context.Context is not ToDoUser user)
             {
                 user = await _userService.GetUserAsync(telegramUserId, ct)
                     ?? await _userService.RegisterUser(telegramUserId, null, ct);
                 context.Context = user;
             }
-
-            // Достаём выбранный список из контекста
             Guid? listId = null;
             if (context.Data.TryGetValue("SelectedListId", out var listIdObj)
                 && listIdObj is Guid lid && lid != Guid.Empty)
@@ -65,8 +58,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
             string listName = context.Data.TryGetValue("SelectedListName", out var nameObj) && nameObj is string n
                 ? n : "Без списка";
-
-            // Загружаем задачи
             var tasks = await _todoService.GetByUserIdAndList(user.UserId, listId, ct);
 
             if (tasks.Count == 0)
@@ -74,11 +65,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                 await bot.SendMessage(chatId, $"Список: {listName}\n\nЗадач пока нет.", cancellationToken: ct);
                 return ScenarioResult.Completed;
             }
-
-            // Заголовок
             await bot.SendMessage(chatId, $"Список: {listName} ({tasks.Count} задач(и)):", cancellationToken: ct);
-
-            // Каждая задача — отдельное сообщение с двумя кнопками
             foreach (var task in tasks)
             {
                 string state = task.State == ToDoItemState.Active ? "[ ]" : "[x]";
@@ -88,7 +75,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                 string text = $"{state} {task.Name}{deadline}";
 
-                // callbackData для кнопок
                 var showDto = new ToDoItemCallbackDto { Action = "showtask", ToDoItemId = task.Id };
 
                 var keyboard = new InlineKeyboardMarkup(new[]

@@ -6,8 +6,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Dto
     {
         public string Action { get; set; } = string.Empty;
         public Guid ToDoItemId { get; set; }
-
-        // Формат: "action|toDoItemId"
         public override string ToString()
         {
             return $"{Action}|{ToDoItemId}";

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 {
-    public enum ScenarioResult // Видимо результат сценария,  Transition - идет задание, Completed - сценарий завершен
+    public enum ScenarioResult 
     {
         Transition, Completed 
     }

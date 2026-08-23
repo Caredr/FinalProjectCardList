@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//new try
+
 namespace FinalProjectCardList.Core.BackgroundTasks
 {
     public class BackgroundTaskRunner : IDisposable
@@ -13,10 +13,6 @@ namespace FinalProjectCardList.Core.BackgroundTasks
         private Task? _runningTasks;
         private CancellationTokenSource? _stoppingCts;
 
-        /// <summary>
-        /// Регистрирует задачу для последующего запуска.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Tasks are already running</exception>
         public void AddTask(IBackgroundTask task)
         {
             if (_runningTasks is not null)
@@ -25,10 +21,6 @@ namespace FinalProjectCardList.Core.BackgroundTasks
             _tasks.Add(task);
         }
 
-        /// <summary>
-        /// Запускает зарегистрированные задачи
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Tasks are already running</exception>
         public void StartTasks(CancellationToken ct)
         {
             if (_runningTasks is not null)
@@ -36,7 +28,6 @@ namespace FinalProjectCardList.Core.BackgroundTasks
 
             _stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
-            // Отдельная обёртка для логирования и корректной обработки отмены
             static async Task RunSafe(IBackgroundTask task, CancellationToken ct)
             {
                 try
@@ -45,7 +36,6 @@ namespace FinalProjectCardList.Core.BackgroundTasks
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested)
                 {
-                    // нормально завершаемся при отмене
                 }
                 catch (Exception ex)
                 {
@@ -53,13 +43,9 @@ namespace FinalProjectCardList.Core.BackgroundTasks
                 }
             }
 
-            // Собираем все таски в один
             _runningTasks = Task.WhenAll(_tasks.Select(t => RunSafe(t, _stoppingCts.Token)));
         }
 
-        /// <summary>
-        /// Останавливает запущенные задачи и и ожидает из завершения
-        /// </summary>
         public async Task StopTasks(CancellationToken ct)
         {
             if (_runningTasks is null)

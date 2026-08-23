@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 {
-    public enum ScenarioType // типы сценариев
+    public enum ScenarioType
     {
         None, AddTask, AddList, DeleteList, ShowTasks, DeleteTask, PostponeTask
     }
