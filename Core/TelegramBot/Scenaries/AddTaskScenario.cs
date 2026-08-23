@@ -2,6 +2,7 @@
 using FinalProjectCardList.Core.Entities;
 using FinalProjectCardList.Core.Services;
 using FinalProjectCardList.Core.TelegramBot.Dto;
+using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -151,6 +152,58 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                         context.Data["TaskName"] = inputText;
 
+
+
+                        await bot.SendMessage(
+                            message.Chat.Id,
+                            "Введите дедлайн в формате ДД.ММ.ГГГГ или /skip:",
+                            replyMarkup: new ReplyKeyboardMarkup(new KeyboardButton("/skip"))
+                            {
+                                ResizeKeyboard = true,
+                                OneTimeKeyboard = true
+                            },
+                            cancellationToken: ct);
+
+                        context.CurrentStep = "Deadline";  // ← ИЗМЕНИТЕ НА ЭТО
+                        return ScenarioResult.Transition;
+                    }
+                case "Deadline":
+                    {
+                        if ((inputText ?? string.Empty).Equals("/skip", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Data["Deadline"] = null;
+
+                            await bot.SendMessage(
+                                message.Chat.Id,
+                                "Введите код сета (например mkc, 2x2, 4ed) или /skip:",
+                                replyMarkup: new ReplyKeyboardMarkup(new KeyboardButton("/skip"))
+                                {
+                                    ResizeKeyboard = true,
+                                    OneTimeKeyboard = true
+                                },
+                                cancellationToken: ct);
+
+                            context.CurrentStep = "Set";
+                            return ScenarioResult.Transition;
+                        }
+
+                        if (!DateTime.TryParseExact(
+                                inputText,
+                                "dd.MM.yyyy",
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out var deadline))
+                        {
+                            await bot.SendMessage(
+                                message.Chat.Id,
+                                "❌ Неверный формат даты.\n" +
+                                "Введите дату в формате ДД.ММ.ГГГГ (например, 25.12.2026) или /skip:",
+                                cancellationToken: ct);
+                            return ScenarioResult.Transition;
+                        }
+
+                        context.Data["Deadline"] = deadline.Date;
+
                         await bot.SendMessage(
                             message.Chat.Id,
                             "Введите код сета (например mkc, 2x2, 4ed) или /skip:",
@@ -286,7 +339,10 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             var scryfallSet = context.Data.TryGetValue("ScryfallSet", out var setObj) ? setObj as string : null;
             var scryfallCollectorNumber = context.Data.TryGetValue("ScryfallCollectorNumber", out var numObj) ? numObj as string : null;
             var quantity = context.Data.TryGetValue("Quantity", out var qObj) && qObj is int q ? q : 1;
-
+            var deadline = context.Data.TryGetValue("Deadline", out var deadlineObj) &&
+               deadlineObj is DateTime deadlineValue
+    ? deadlineValue
+    : (DateTime?)null;
             Console.WriteLine($"[CreateTaskAsync] Task: {taskName}, Set: {scryfallSet}, Number: {scryfallCollectorNumber}");
 
             ScryfallCard? card = null;
@@ -314,12 +370,12 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             }
 
             var item = await _todoService.AddAsync(
-                user,
-                taskName,
-                list,
-                DateTime.MaxValue,
-                quantity,
-                ct);
+                     user,
+                     taskName,
+                     list,
+                     deadline,  // ← 25.12.2026
+                     quantity,
+                     ct);
 
             Console.WriteLine($"[CreateTaskAsync] After AddAsync: {item.Id}, ListId: {item.ListId?.Id}");
 
