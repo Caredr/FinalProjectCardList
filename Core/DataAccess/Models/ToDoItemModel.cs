@@ -17,7 +17,7 @@ namespace FinalProjectCardList.Core.DataAccess.Models
         [PrimaryKey, Column("Id")]
    
         public Guid Id { get; set; }
-        // Внешние ключи
+        
         [Column("UserId")]
         public Guid UserId { get; set; }
 
@@ -40,7 +40,7 @@ namespace FinalProjectCardList.Core.DataAccess.Models
         public Guid? ListId { get; set; }
         [Column("Quantity")]
         [Column] public int Quantity { get; set; } = 1;
-        // Scryfall поля
+        
         [Column("ScryfallSet", CanBeNull = true)]
         public string? ScryfallSet { get; set; }
 
@@ -52,7 +52,6 @@ namespace FinalProjectCardList.Core.DataAccess.Models
         [Column("LastPriceCheckedAt", CanBeNull = true)]
         public DateTime? LastPriceCheckedAt { get; set; }
 
-        // Связи
         [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoUserModel.UserId))]
         public ToDoUserModel? User { get; set; }
 

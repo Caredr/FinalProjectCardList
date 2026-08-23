@@ -26,8 +26,8 @@ namespace FinalProjectCardList.Core.Services
             var item = new ToDoItem
             {
                 Id = Guid.NewGuid(),
-                UserId = user,  // ← ToDoUser
-                ListId = list,  // ← ToDoList?
+                UserId = user,  
+                ListId = list,  
                 Name = name,
                 CreatedAt = DateTime.UtcNow,
                 State = ToDoItemState.Active,
@@ -71,20 +71,19 @@ namespace FinalProjectCardList.Core.Services
 
         public static void CountAdd()
         {
-            Console.WriteLine("Введите максимальное количество задач"); //1
-            string tasksCountstext = Console.ReadLine() ?? "Ошибка";   //2
+            Console.WriteLine("Введите максимальное количество задач"); 
+            string tasksCountstext = Console.ReadLine() ?? "Ошибка";   
             TasksLimit(tasksCountstext);
 
         }
         public async Task<IReadOnlyList<ToDoList>> GetListsByUserId(Guid userId, CancellationToken ct)
         {
-            // Читаем все задачи из файлов и собираем уникальные списки
             var allItems = await _iToDoRepository.GetAllByUserId(userId, ct);
             var lists = allItems
-       .Where(i => i.ListId is not null)   // у задачи есть список
-       .Select(i => i.ListId!)             // берём сам ToDoList
-       .GroupBy(l => l.Id)               // группируем по Id списка
-       .Select(g => g.First())           // оставляем по одному экземпляру
+       .Where(i => i.ListId is not null)   
+       .Select(i => i.ListId!)             
+       .GroupBy(l => l.Id)              
+       .Select(g => g.First())          
        .ToList();
             return lists.AsReadOnly();
         }
@@ -96,7 +95,7 @@ namespace FinalProjectCardList.Core.Services
 
         public async Task<IReadOnlyList<ToDoItem>> GetByUserIdAndList(Guid userId, Guid? listId, CancellationToken ct, ToDoItemState? stateFilter = null)
         {
-            var allItems = await _iToDoRepository.GetAllByUserId(userId, ct); // ← берём ВСЕ задачи
+            var allItems = await _iToDoRepository.GetAllByUserId(userId, ct); 
             var filtered = allItems.Where(item =>
             {
                 bool listMatch = listId.HasValue
@@ -130,12 +129,7 @@ namespace FinalProjectCardList.Core.Services
         {
             await _iToDoRepository.Update(task, ct);
         }
-        private static void ParseAndValidateInt(string? str, int min, int max)
-        {
-            str = ValidateString(str);
-            int taskTextLenght = Translator(str);
-            Validate(taskTextLenght, min, max);
-        }
+
         #region CustomThrows
         public static int TasksLimit(string limit)
         {
@@ -145,29 +139,6 @@ namespace FinalProjectCardList.Core.Services
                 throw new ArgumentException("число должно быть больше 0-я и  меньше 100");
             }
             return taskCount;
-        }
-        //private int TestTo(string stringToTest)
-        //{
-        //    if (!int.TryParse(stringToTest, out int taskTextLenght))
-        //    {
-        //        throw new ArgumentException("Нельзя превратить текст в число");
-        //    }
-        //    return taskTextLenght;
-        //}
-        private static string ValidateString(string stringToTest)
-        {
-            if (string.IsNullOrWhiteSpace(stringToTest))
-            {
-                throw new ArgumentException("Строка не может быть пустой");
-            }
-            return stringToTest;
-        }
-        private static void Validate(int lenghtToTest, int minLenght, int maxLenght)
-        {
-            if (lenghtToTest < minLenght || lenghtToTest > maxLenght)
-            {
-                throw new ArgumentException("слишком короткое название или слишком длинное");
-            }
         }
         public static int Translator(string stringToTest)
         {

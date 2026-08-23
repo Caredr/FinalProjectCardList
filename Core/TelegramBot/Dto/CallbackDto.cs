@@ -13,9 +13,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Dto
         {
             if (input is null)
                 throw new ArgumentNullException(nameof(input));
-            // ищем первый |
             var separatorIndex = input.IndexOf('|');
-            // если | нет — вся строка = Action
             if (separatorIndex < 0)
             {
                 return new CallbackDto
@@ -23,7 +21,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Dto
                     Action = input
                 };
             }
-            // до первого | — это action
             var action = input.Substring(0, separatorIndex);
             return new CallbackDto
             {

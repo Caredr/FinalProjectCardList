@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.TelegramBot.Dto
 {
-    public class ToDoListCallbackDto : CallbackDto // Класс наследует CallbackDto. Используется для передачи данных через кнопки inline-клавиатуры Telegram.
+    public class ToDoListCallbackDto : CallbackDto 
     {
-        public string Action { get; set; } = string.Empty; //Название действия — например "show", "addtask_list", "deletetask_item". По нему UpdateHandler понимает что делать при нажатии кнопки.
-        public Guid ToDoListId { get; set; } //Id списка или задачи. Переиспользуется для хранения как listId, так и taskId — в зависимости от Action.
-        public static string ToString(ToDoListCallbackDto dto) //Статический метод — преобразует объект в строку для записи в callbackData кнопки. Telegram принимает максимум 64 символа.
+        public string Action { get; set; } = string.Empty; 
+        public Guid ToDoListId { get; set; } 
+        public static string ToString(ToDoListCallbackDto dto) 
         {
-            // Формат: "action|todoListId"
             ArgumentNullException.ThrowIfNull(dto);
             return $"{dto.Action}|{dto.ToDoListId}";
         }

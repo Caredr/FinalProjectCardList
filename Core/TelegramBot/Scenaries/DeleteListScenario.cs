@@ -32,8 +32,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
         ScenarioContext context, Update update, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
-
-            // Извлекаем chatId и telegramUserId из любого типа апдейта
             long chatId = update.CallbackQuery?.Message?.Chat.Id
                        ?? update.Message?.Chat.Id
                        ?? 0;
@@ -45,7 +43,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             {
                 case null:
                 {
-                    // Берём пользователя из контекста если есть, иначе читаем из сервиса
                     var todoUser = context.Context
                         ?? await _userService.GetUserAsync(telegramUserId, ct);
                     if (todoUser == null)
@@ -84,7 +81,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                 case "Approve":
                 {
                     if (!context.Data.TryGetValue("SelectedList", out var obj) || obj is not ToDoList todoList)
-                        return ScenarioResult.Transition; // ждём выбора списка
+                        return ScenarioResult.Transition; 
 
                     var keyboard = new InlineKeyboardMarkup(new[]
                     {

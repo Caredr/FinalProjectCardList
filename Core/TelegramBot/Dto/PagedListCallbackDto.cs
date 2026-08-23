@@ -3,8 +3,6 @@ using System.Linq;
 
 namespace FinalProjectCardList.Core.TelegramBot.Dto
 {
-    // Расширяет ToDoListCallbackDto номером страницы для постраничного вывода.
-    // Формат: "action|toDoListId|page"
     public class PagedListCallbackDto : ToDoListCallbackDto
     {
         public int Page { get; set; }
@@ -28,8 +26,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Dto
             var parts = input.Split('|');
             var page = 0;
             var baseInput = input;
-
-            // Если есть третья часть — это номер страницы, остальное — база "action|id"
             if (parts.Length >= 3)
             {
                 int.TryParse(parts[^1], out page);

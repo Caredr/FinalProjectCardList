@@ -29,13 +29,10 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             switch (context.CurrentStep)
             {
                 case null:
-                    // Получаем ToDoUser и сохраняем в контекст
                     var todoUser = await _iUserService.GetUserAsync(update.Message.From.Id, ct);
                     context.Context = todoUser;
-                    // Отправляем сообщение
                     await bot.SendMessage(update?.Message?.Chat.Id,"Введите название списка:",
                         cancellationToken: ct);
-                    // Обновляем шаг
                     context.CurrentStep = "Name";
                     return ScenarioResult.Transition;
                 case "Name":
@@ -57,7 +54,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                         await bot.SendMessage(update.Message.Chat.Id,
                             $"Ошибка при создании списка: {ex.Message}",
                             cancellationToken: ct);
-                        context.CurrentStep = null;  // чтобы не зависать в сценарии
+                        context.CurrentStep = null;  
                         return ScenarioResult.Completed;
                     }
                 default:

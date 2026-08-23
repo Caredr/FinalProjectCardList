@@ -6,6 +6,8 @@ public class PriceBackgroundTask : IBackgroundTask
 {
     private readonly IToDoService _todoService;
     private readonly IScryfallService _scryfall;
+    private int rateLimit = 100;
+    private float hoursDelay = 24;
 
 
     public PriceBackgroundTask(IToDoService todoService, IScryfallService scryfall)
@@ -35,10 +37,10 @@ public class PriceBackgroundTask : IBackgroundTask
                     await _todoService.Update(task, ct);
                 }
 
-                await Task.Delay(100, ct); // Rate limit: 10 req/s
+                await Task.Delay(rateLimit, ct); 
             }
 
-            await Task.Delay(TimeSpan.FromHours(24), ct);
+            await Task.Delay(TimeSpan.FromHours(hoursDelay), ct);
         }
     }
 }

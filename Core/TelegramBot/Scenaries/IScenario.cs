@@ -12,7 +12,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 {
     public interface IScenario
     {
-        public bool CanHandle(ScenarioType scenario); // Проверка - могу ли обработать данный сценарий
-        public Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct); //Удержание сообщеняи сценария
+        public bool CanHandle(ScenarioType scenario); 
+        public Task<ScenarioResult> HandleMessageAsync(ITelegramBotClient bot, ScenarioContext context, Update update, CancellationToken ct); 
     }
 }

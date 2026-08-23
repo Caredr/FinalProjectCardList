@@ -82,11 +82,12 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 StateChangedAt = entity.StateChangedAt,
                 Deadline = entity.Deadline,
                 Quantity = entity.Quantity,
+
                 ScryfallSet = entity.ScryfallSet,
                 ScryfallCollectorNumber = entity.ScryfallCollectorNumber,
                 LastPriceUsd = entity.LastPriceUsd,
                 LastPriceCheckedAt = entity.LastPriceCheckedAt,
-                // Навигационные свойства
+
                 User = entity.UserId != null ? MapToModel(entity.UserId) : null,
                 List = entity.ListId != null ? MapToModel(entity.ListId) : null
             };

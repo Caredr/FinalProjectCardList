@@ -15,7 +15,7 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         private readonly JsonSerializerOptions _options = new() { WriteIndented = true };
         public FileUserRepository(string basePath)
         {
-            _basePath = basePath;  // Базовая папка из конструктора
+            _basePath = basePath; 
             Directory.CreateDirectory(_basePath);
         }
         public  Task<string> GetFilePath(Guid userId) => Task.FromResult(Path.Combine(_basePath, $"{userId}.json"));
@@ -36,10 +36,8 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
         {
             return await LoadUserAsync(userId, ct);
         }
-
         public async Task<ToDoUser?> GetUserByTelegramUserId(long telegramUserId, CancellationToken ct)
         {
-            // Сканируем все файлы пользователей (мало файлов, приемлемо)
             var files = Directory.GetFiles(_basePath, "*.json");
             foreach (string file in files)
             {

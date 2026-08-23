@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.Entities
 {
-    public enum ToDoItemState //Состояние задачи
+    public enum ToDoItemState 
     {
         Active,
         Completed
