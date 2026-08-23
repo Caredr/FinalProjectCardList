@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.Entities
 {
-    internal class ToDoItem // это сущность (entity) для отдельной задачи в ToDo-приложении.
-                          // Хранит полную информацию об одной задаче пользователя.
+    public class ToDoItem // это сущность (entity) для отдельной задачи в ToDo-приложении.
+                            // Хранит полную информацию об одной задаче пользователя.
     {
         public Guid Id { get; set; } //Уникальный идентификатор задачи
         public ToDoUser UserId { get; set; } //Владелец задачи
@@ -18,5 +18,11 @@ namespace FinalProjectCardList.Core.Entities
         public DateTime? Deadline { get; set; } //Срок выполнения (опционально)
         public ToDoList? ListId { get; set; } //Список, к которому принадлежит (опционально)
         public int Quantity { get; set; } = 1;
+
+        // Scryfall поля
+        public string? ScryfallSet { get; set; }          // например "mkc"
+        public string? ScryfallCollectorNumber { get; set; } // например "123"
+        public decimal? LastPriceUsd { get; set; }
+        public DateTime? LastPriceCheckedAt { get; set; }
     }
 }

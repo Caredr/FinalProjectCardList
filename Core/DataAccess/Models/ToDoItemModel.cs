@@ -40,6 +40,17 @@ namespace FinalProjectCardList.Core.DataAccess.Models
         public Guid? ListId { get; set; }
         [Column("Quantity")]
         [Column] public int Quantity { get; set; } = 1;
+        // Scryfall поля
+        [Column("ScryfallSet", CanBeNull = true)]
+        public string? ScryfallSet { get; set; }
+
+        [Column("ScryfallCollectorNumber", CanBeNull = true)]
+        public string? ScryfallCollectorNumber { get; set; }
+
+        [Column("LastPriceUsd", CanBeNull = true)]
+        public decimal? LastPriceUsd { get; set; }
+        [Column("LastPriceCheckedAt", CanBeNull = true)]
+        public DateTime? LastPriceCheckedAt { get; set; }
 
         // Связи
         [Association(ThisKey = nameof(UserId), OtherKey = nameof(ToDoUserModel.UserId))]

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.Entities
 {
-    internal class ToDoList // это сущность (entity) для списка задач в ToDo-приложении. 
+    public class ToDoList // это сущность (entity) для списка задач в ToDo-приложении. 
                             // Хранит информацию о списке задач, включая его название, владельца и дату создания. 
                             // Список может содержать несколько задач (ToDoItem), которые принадлежат этому списку.
     {

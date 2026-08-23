@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.DataAccess
 {
-    internal interface IToDoService // Сервис для работы с бизнес-логикой,
+    public interface IToDoService // Сервис для работы с бизнес-логикой,
                                     // связанной с задачами. Он использует IToDoRepository для взаимодействия
                                     // с данными и предоставляет методы для создания, получения, обновления и удаления задач,
                                     // а также для получения задач по определенным критериям (например, по имени или по списку дел).
@@ -30,5 +30,7 @@ namespace FinalProjectCardList.Core.DataAccess
         Task<IReadOnlyList<ToDoList>> GetListsByUserId(Guid userId, CancellationToken ct);
         Task<ToDoItem?> Get(Guid toDoItemId, CancellationToken ct);
         Task MoveTaskToListAsync(Guid taskId, ToDoList? targetList, CancellationToken ct);
+            Task<IReadOnlyList<ToDoItem>> GetAllAsync(CancellationToken ct);
+    Task Update(ToDoItem task, CancellationToken ct);
     }
 }

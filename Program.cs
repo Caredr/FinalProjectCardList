@@ -37,6 +37,7 @@ namespace FinalProjectCardList
                 IToDoRepository toDoRepo = new SqlToDoRepository(factory);
                 IToDoListRepository toDoListRepo = new SqlToDoListRepository(factory);
                 INotificationService notificationService = new NotificationService(factory);
+                IScryfallService scryfallService = new ScryfallService();
 
                 UserService userService = new UserService(userRepo);
                 ToDoReportService toDoReportService = new ToDoReportService(toDoRepo);
@@ -45,7 +46,7 @@ namespace FinalProjectCardList
 
                 var scenarios = new List<IScenario>
                 {
-                    new AddTaskScenario(userService, toDoService, toDoListService),
+                    new AddTaskScenario(userService, toDoService, toDoListService, scryfallService),
                     new AddListScenario(userService, toDoListService),
                     new DeleteListScenario(userService, toDoListService),
                     new ShowTasksScenario(toDoService, userService),
@@ -81,6 +82,9 @@ namespace FinalProjectCardList
                 backgroundTaskRunner.AddTask(new TodayBackgroundTask(notificationService: notificationService,
                     userRepository: userRepo, toDoRepository: toDoRepo));
 
+                backgroundTaskRunner.AddTask(new PriceBackgroundTask(
+                        todoService: toDoService,
+                                 scryfall: scryfallService));
                 backgroundTaskRunner.StartTasks(token);
 
                 botClient.StartReceiving(

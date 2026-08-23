@@ -824,9 +824,10 @@ namespace FinalProjectCardList.Core.TelegramBot
         {
             string state = task.State == ToDoItemState.Active ? "[ ]" : "[x]";
             string quantity = task.Quantity > 1 ? $" {task.Quantity}x" : string.Empty;
+            string price = task.LastPriceUsd.HasValue ? $" 💰 ${task.LastPriceUsd:N2}" : string.Empty;
             string deadline = task.Deadline.HasValue ? $" 📅 {task.Deadline.Value:dd.MM.yyyy}" : string.Empty;
 
-            string label = $"{index + 1}. {state} {task.Name}{quantity}{deadline}";
+            string label = $"{index + 1}. {state} {task.Name}{quantity}{price}{deadline}";
             return label.Length > 64 ? label[..64] : label;
         }
 

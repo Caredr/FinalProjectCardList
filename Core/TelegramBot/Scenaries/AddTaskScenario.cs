@@ -14,15 +14,18 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
         private readonly IUserService _userService;
         private readonly IToDoService _todoService;
         private readonly IToDoListService _todoListService;
+        private readonly IScryfallService _scryfallService;
 
         public AddTaskScenario(
             IUserService userService,
             IToDoService todoService,
-            IToDoListService todoListService)
+            IToDoListService todoListService,
+            IScryfallService scryfallService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _todoService = todoService ?? throw new ArgumentNullException(nameof(todoService));
             _todoListService = todoListService ?? throw new ArgumentNullException(nameof(todoListService));
+            _scryfallService = scryfallService ?? throw new ArgumentNullException(nameof(scryfallService));
         }
 
         public bool CanHandle(ScenarioType scenario)
@@ -38,22 +41,19 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
         {
             ct.ThrowIfCancellationRequested();
 
-            // 1. Обработка inline‑callback (выбор списка)
             if (update.CallbackQuery is { } callbackQuery)
             {
                 return await HandleCallbackQueryAsync(bot, context, callbackQuery, ct);
             }
 
-            // 2. Обычное сообщение
             if (update.Message is not { } message)
                 return ScenarioResult.Completed;
 
             var inputText = message.Text?.Trim();
-            var user = context.Context;
+            var user = context.Context as ToDoUser;
 
             switch (context.CurrentStep)
             {
-                // Шаг 0: показываем списки
                 case null:
                     {
                         if (user == null)
@@ -66,7 +66,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                         var rows = new List<IEnumerable<InlineKeyboardButton>>();
 
-                        // 📌 Без списка
                         var noListDto = new ToDoListCallbackDto
                         {
                             Action = "addtask_list",
@@ -78,7 +77,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                             InlineKeyboardButton.WithCallbackData("📌Без списка", noListData)
                         });
 
-                        // Списки пользователя
                         foreach (var list in lists)
                         {
                             var dto = new ToDoListCallbackDto
@@ -100,13 +98,16 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                         await bot.SendMessage(
                             chatId: message.Chat.Id,
-                            text: "Выберите список для новой задачи:",
+                            text: "Выберите список для новой карты:",
                             replyMarkup: markup,
                             cancellationToken: ct);
 
                         context.CurrentStep = "SelectList";
                         return ScenarioResult.Transition;
                     }
+
+                case "SelectList":
+                    return ScenarioResult.Transition;
 
                 case "Quantity":
                     {
@@ -132,14 +133,13 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                         await bot.SendMessage(
                             message.Chat.Id,
-                            "Введите название задачи:",
+                            "Введите название карты:",
                             cancellationToken: ct);
 
                         context.CurrentStep = "Name";
                         return ScenarioResult.Transition;
                     }
 
-                // Шаг 1: ввод имени
                 case "Name":
                     {
                         if (string.IsNullOrWhiteSpace(inputText))
@@ -155,133 +155,45 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                         await bot.SendMessage(
                             message.Chat.Id,
-                            "Введите дедлайн (ДД.ММ.ГГГГ) или /skip для без дедлайна:",
+                            "Введите код сета (например mkc, 2x2, 4ed) или /skip:",
+                            replyMarkup: new ReplyKeyboardMarkup(new KeyboardButton("/skip"))
+                            {
+                                ResizeKeyboard = true,
+                                OneTimeKeyboard = true
+                            },
                             cancellationToken: ct);
 
-                        context.CurrentStep = "Deadline";
+                        context.CurrentStep = "Set";
                         return ScenarioResult.Transition;
                     }
 
-                // Шаг 2: дедлайн + фактическое создание задачи
-                case "Deadline":
+                case "Set":
                     {
-                        if (!context.Data.TryGetValue("TaskName", out var taskNameObj) ||
-                            taskNameObj is not string taskName ||
-                            string.IsNullOrWhiteSpace(taskName))
+                        if ((inputText ?? string.Empty).Equals("/skip", StringComparison.OrdinalIgnoreCase))
                         {
-                            await bot.SendMessage(
-                                message.Chat.Id,
-                                "❌ Ошибка: название задачи потеряно. Начните заново.",
-                                cancellationToken: ct);
-
-                            context.CurrentStep = null;
-                            context.Data.Clear();
+                            context.Data["ScryfallSet"] = null;
+                            context.Data["ScryfallCollectorNumber"] = null;
+                            await CreateTaskAsync(bot, context, user!, ct);
                             return ScenarioResult.Completed;
                         }
 
-                        if (user == null)
-                        {
-                            await bot.SendMessage(
-                                message.Chat.Id,
-                                "❌ Ошибка: пользователь не найден. Начните заново.",
-                                cancellationToken: ct);
-
-                            context.CurrentStep = null;
-                            context.Data.Clear();
-                            return ScenarioResult.Completed;
-                        }
-
-                        var quantity =
-                            context.Data.TryGetValue("Quantity", out var qObj) && qObj is int q
-                                ? q
-                                : 1;
-
-                        // Восстанавливаем выбранный список
-                        ToDoList? list = null;
-
-                        if (context.Data.TryGetValue("SelectedListId", out var listIdObj) &&
-                            listIdObj is Guid listId &&
-                            listId != Guid.Empty)
-                        {
-                            list = await _todoListService.GetAsync(listId, ct);
-                        }
-
-                        Console.WriteLine(
-                            $"[Deadline] SelectedListId = {(context.Data.TryGetValue("SelectedListId", out var lid) ? lid.ToString() : "null")}");
-                        Console.WriteLine(
-                            $"[Deadline] list = {(list?.Id.ToString() ?? "null")}");
-
-                        if (DateTime.TryParseExact(
-                                inputText ?? string.Empty,
-                                "dd.MM.yyyy",
-                                null,
-                                System.Globalization.DateTimeStyles.None,
-                                out var deadline))
-                        {
-                            var item = await _todoService.AddAsync(
-                                user,
-                                taskName,
-                                list,
-                                deadline,
-                                quantity,
-                                ct);
-
-                            Console.WriteLine(
-                                $"[Deadline] Задача создана: {item.Id}, ListId = {item.ListId}");
-
-                            await bot.SendMessage(
-                                message.Chat.Id,
-                                $"✅ *{taskName}*\n" +
-                                $"📅 Дедлайн: `{deadline:dd.MM.yyyy}`\n" +
-                                $"🆔 `{item.Id}`",
-                                cancellationToken: ct,
-                                parseMode: ParseMode.Markdown);
-
-                            context.CurrentStep = null;
-                            context.Data.Clear();
-                            return ScenarioResult.Completed;
-                        }
-
-                        if ((inputText ?? string.Empty)
-                            .Equals("/skip", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var item = await _todoService.AddAsync(
-                                user,
-                                taskName,
-                                list,
-                                DateTime.MaxValue,
-                                quantity,
-                                ct);
-
-                            Console.WriteLine(
-                                $"[Deadline] Задача создана (без дедлайна): {item.Id}, ListId = {item.ListId}");
-
-                            await bot.SendMessage(
-                                message.Chat.Id,
-                                $"✅ *{taskName}* добавлена без дедлайна!\n" +
-                                $"🆔 `{item.Id}`",
-                                cancellationToken: ct,
-                                parseMode: ParseMode.Markdown);
-
-                            context.CurrentStep = null;
-                            context.Data.Clear();
-                            return ScenarioResult.Completed;
-                        }
+                        context.Data["ScryfallSet"] = inputText;
 
                         await bot.SendMessage(
                             message.Chat.Id,
-                            "❌ Неверный формат!\n" +
-                            "💡 Пример: `15.12.2024`\n" +
-                            "💡 Или `/skip` для без дедлайна",
-                            cancellationToken: ct,
-                            parseMode: ParseMode.Markdown);
+                            "Введите collector number:",
+                            cancellationToken: ct);
 
+                        context.CurrentStep = "CollectorNumber";
                         return ScenarioResult.Transition;
                     }
 
-                case "SelectList":
-                    // В этом шаге работаем только через CallbackQuery
-                    return ScenarioResult.Transition;
+                case "CollectorNumber":
+                    {
+                        context.Data["ScryfallCollectorNumber"] = inputText;
+                        await CreateTaskAsync(bot, context, user!, ct);
+                        return ScenarioResult.Completed;
+                    }
 
                 default:
                     await bot.SendMessage(
@@ -295,9 +207,6 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             }
         }
 
-        /// <summary>
-        /// Обработка callback'ов внутри AddTaskScenario (выбор списка).
-        /// </summary>
         private async Task<ScenarioResult> HandleCallbackQueryAsync(
             ITelegramBotClient bot,
             ScenarioContext context,
@@ -367,6 +276,82 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
             await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
             return ScenarioResult.Transition;
+        }
+
+        private async Task CreateTaskAsync(
+     ITelegramBotClient bot,
+     ScenarioContext context,
+     ToDoUser user,
+     CancellationToken ct)
+        {
+            var taskName = context.Data["TaskName"] as string;
+            var scryfallSet = context.Data.TryGetValue("ScryfallSet", out var setObj) ? setObj as string : null;
+            var scryfallCollectorNumber = context.Data.TryGetValue("ScryfallCollectorNumber", out var numObj) ? numObj as string : null;
+            var quantity = context.Data.TryGetValue("Quantity", out var qObj) && qObj is int q ? q : 1;
+
+            ScryfallCard? card = null;
+            if (!string.IsNullOrEmpty(scryfallSet) && !string.IsNullOrEmpty(scryfallCollectorNumber))
+            {
+                card = await _scryfallService.GetCardPriceAsync(
+                    taskName,
+                    scryfallSet,
+                    scryfallCollectorNumber,
+                    ct);
+            }
+            else if (!string.IsNullOrEmpty(taskName))
+            {
+                card = await _scryfallService.GetCardPriceAsync(taskName, null, null, ct);
+            }
+
+            ToDoList? list = null;
+            if (context.Data.TryGetValue("SelectedListId", out var listIdObj) &&
+                listIdObj is Guid listId &&
+                listId != Guid.Empty)
+            {
+                list = await _todoListService.GetAsync(listId, ct);
+            }
+
+            var item = await _todoService.AddAsync(
+                user,
+                taskName,
+                list,
+                DateTime.MaxValue,
+                quantity,
+                ct);
+
+            if (card != null && card.Usd.HasValue)
+            {
+                item.ScryfallSet = scryfallSet;
+                item.ScryfallCollectorNumber = scryfallCollectorNumber;
+                item.LastPriceUsd = card.Usd;
+                item.LastPriceCheckedAt = DateTime.UtcNow;
+                await _todoService.Update(item, ct);
+            }
+
+            string cardInfo = !string.IsNullOrEmpty(scryfallSet) && !string.IsNullOrEmpty(scryfallCollectorNumber)
+                ? $" [{scryfallSet} #{scryfallCollectorNumber}]"
+                : "";
+
+            string priceText = card?.Usd != null ? $"\n💰 Цена: ${card.Usd:N2}" : "";
+            string quantityText = quantity > 1 ? $"\nКоличество: {quantity}x" : "";
+
+            // Получите ChatId из context.Data
+            if (!context.Data.TryGetValue("ChatId", out var chatIdObj) || chatIdObj is not long chatId)
+            {
+                // Заглушка, если ChatId не найден
+                chatId = 0;
+            }
+
+            await bot.SendMessage(
+                chatId,  // ← Теперь это long (ChatId)
+                $"✅ Карта создана!" +
+                $"\n{taskName}{cardInfo}" +
+                quantityText +
+                priceText,
+                cancellationToken: ct);
+
+            context.CurrentStep = null;
+            context.Data.Clear();
         }
     }
 }

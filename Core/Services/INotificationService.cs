@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.Services
 {
-    internal interface INotificationService
+    public interface INotificationService
     {
         //Создает нотификацию. Если запись с userId и type уже есть, то вернуть false и не добавлять запись, иначе вернуть true
         Task<bool> ScheduleNotification(

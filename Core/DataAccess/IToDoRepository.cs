@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.DataAccess
 {
-    interface IToDoRepository  // Репозиторий для работой с БД по задачам. Содержит методы для получения всех задач пользователя, получения активных задач пользователя, получения задачи по id, добавления новой задачи, обновления существующей задачи и удаления задачи. Также содержит методы для проверки существования задачи с таким именем у пользователя и для получения количества активных задач у пользователя.
+    internal interface IToDoRepository  // Репозиторий для работой с БД по задачам. Содержит методы для получения всех задач пользователя, получения активных задач пользователя, получения задачи по id, добавления новой задачи, обновления существующей задачи и удаления задачи. Также содержит методы для проверки существования задачи с таким именем у пользователя и для получения количества активных задач у пользователя.
     {
         //Возвращает все ToDoItem для UserId
         Task<IReadOnlyList<ToDoItem>> GetAllByUserId(Guid userId, CancellationToken ct);
@@ -29,5 +29,6 @@ namespace FinalProjectCardList.Core.DataAccess
         Task<IReadOnlyList<ToDoItem>> Find(Guid userId, Func<ToDoItem, bool> predicate, CancellationToken ct);
         //Возвращает активные задачи, у которых Deadline >= from && Deadline < to
         Task<IReadOnlyList<ToDoItem>> GetActiveWithDeadline(Guid userId, DateTime from, DateTime to, CancellationToken ct);
+        Task<IReadOnlyList<ToDoItem>> GetAllAsync(CancellationToken ct);
     }
 }

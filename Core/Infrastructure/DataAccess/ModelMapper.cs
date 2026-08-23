@@ -53,7 +53,11 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 State = model.State,
                 StateChangedAt = model.StateChangedAt,
                 Deadline = model.Deadline,
-                Quantity = model.Quantity
+                Quantity = model.Quantity,
+                ScryfallSet = model.ScryfallSet,
+                ScryfallCollectorNumber = model.ScryfallCollectorNumber,
+                LastPriceUsd = model.LastPriceUsd,
+                LastPriceCheckedAt = model.LastPriceCheckedAt
             };
 
             return entity;
@@ -78,6 +82,10 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 StateChangedAt = entity.StateChangedAt,
                 Deadline = entity.Deadline,
                 Quantity = entity.Quantity,
+                ScryfallSet = entity.ScryfallSet,
+                ScryfallCollectorNumber = entity.ScryfallCollectorNumber,
+                LastPriceUsd = entity.LastPriceUsd,
+                LastPriceCheckedAt = entity.LastPriceCheckedAt,
                 // Навигационные свойства
                 User = entity.UserId != null ? MapToModel(entity.UserId) : null,
                 List = entity.ListId != null ? MapToModel(entity.ListId) : null
