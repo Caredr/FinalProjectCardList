@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinalProjectCardList.Core.Entities
 {
-    internal class Notification
+    public class Notification
     {
         public Guid Id { get; set; }
         public ToDoUser? User { get; set; }

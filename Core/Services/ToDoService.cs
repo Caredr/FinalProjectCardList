@@ -121,6 +121,15 @@ namespace FinalProjectCardList.Core.Services
 
             await _iToDoRepository.Update(task, ct);
         }
+        public async Task<IReadOnlyList<ToDoItem>> GetAllAsync(CancellationToken ct)
+        {
+            return await _iToDoRepository.GetAllAsync(ct);
+        }
+
+        public async Task Update(ToDoItem task, CancellationToken ct)
+        {
+            await _iToDoRepository.Update(task, ct);
+        }
         private static void ParseAndValidateInt(string? str, int min, int max)
         {
             str = ValidateString(str);

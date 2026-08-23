@@ -35,6 +35,21 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 .ToList();
         }
 
+        public async Task<IReadOnlyList<ToDoItem>> GetAllAsync(CancellationToken ct)
+        {
+            using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
+
+            var models = await dbContext.ToDoItem
+                .LoadWith(i => i.User)
+                .LoadWith(i => i.List)
+                .LoadWith(i => i.List!.User)
+                .ToListAsync(ct);
+
+            return models
+                .Select(ModelMapper.MapFromModel)
+                .ToList();
+        }
+
         public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserId(Guid userId, CancellationToken ct)
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
@@ -103,9 +118,13 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 .Set(i => i.State, updated.State)
                 .Set(i => i.StateChangedAt, updated.StateChangedAt)
                 .Set(i => i.Deadline, updated.Deadline)
-                .Set(i => i.UserId, updated.UserId)  // ← Guid, а не User
-                .Set(i => i.ListId, updated.ListId)  // ← Guid?, а не List
+                .Set(i => i.UserId, updated.UserId)
+                .Set(i => i.ListId, updated.ListId)
                 .Set(i => i.Quantity, updated.Quantity)
+                .Set(i => i.ScryfallSet, updated.ScryfallSet)
+                .Set(i => i.ScryfallCollectorNumber, updated.ScryfallCollectorNumber)
+                .Set(i => i.LastPriceUsd, updated.LastPriceUsd)
+                .Set(i => i.LastPriceCheckedAt, updated.LastPriceCheckedAt)
                 .UpdateAsync(ct);
         }
 
@@ -162,8 +181,12 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
                 .Where(predicate)
                 .ToList();
         }
+
         public async Task<IReadOnlyList<ToDoItem>> GetActiveWithDeadline(
-        Guid userId,DateTime from,DateTime to,CancellationToken ct)
+            Guid userId,
+            DateTime from,
+            DateTime to,
+            CancellationToken ct)
         {
             using var dbContext = ((IDataContextFactory<ToDoDataContext>)_factory).CreateDataContext();
 

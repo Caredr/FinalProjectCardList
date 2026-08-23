@@ -206,5 +206,26 @@ namespace FinalProjectCardList.Core.Infrastructure.DataAccess
             return items
                 .Where(i => i.Deadline >= from && i.Deadline < to).ToList().AsReadOnly();
         }
+        public async Task<IReadOnlyList<ToDoItem>> GetAllAsync(CancellationToken ct)
+        {
+            var items = new List<ToDoItem>();
+
+            if (!Directory.Exists(_basePath))
+                return items.AsReadOnly();
+
+            var userFolders = Directory.GetDirectories(_basePath);
+            foreach (string userFolder in userFolders)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                if (Guid.TryParse(Path.GetFileName(userFolder), out Guid userId))
+                {
+                    var userItems = await GetAllByUserId(userId, ct);
+                    items.AddRange(userItems);
+                }
+            }
+
+            return items.AsReadOnly();
+        }
     }
 }
