@@ -651,22 +651,17 @@ namespace FinalProjectCardList.Core.TelegramBot
                 ToDoListId = Guid.Empty
             };
             var noListCallback = ToDoListCallbackDto.ToString(noListCallbackDto);
-
-            rows.Add(
-            [
-                InlineKeyboardButton.WithCallbackData("📌 Без списка", noListCallback)
-            ]);
+            rows.Add(new[]
+            {
+        InlineKeyboardButton.WithCallbackData("📊 Все задачи", noListCallback)
+    });
 
             foreach (var list in lists)
             {
+                // Кнопка для показа задач
                 var dto = new ToDoListCallbackDto
                 {
                     Action = "show",
-                    ToDoListId = list.Id
-                };
-                var exportDto = new ToDoListCallbackDto
-                {
-                    Action = "export",
                     ToDoListId = list.Id
                 };
                 var callbackData = ToDoListCallbackDto.ToString(dto);
@@ -675,15 +670,30 @@ namespace FinalProjectCardList.Core.TelegramBot
 
                 rows.Add(new[]
                 {
-                    InlineKeyboardButton.WithCallbackData(list.Name ?? "(без имени)", callbackData)
-                });
+            InlineKeyboardButton.WithCallbackData(list.Name ?? "(без имени)", callbackData)
+        });
+
+                // ← ДОБАВЬТЕ ЭТО: Кнопка экспорта
+                var exportDto = new ToDoListCallbackDto
+                {
+                    Action = "export",
+                    ToDoListId = list.Id
+                };
+                var exportCallback = ToDoListCallbackDto.ToString(exportDto);
+                if (exportCallback.Length > commandDataMaxLenght)
+                    exportCallback = exportCallback[..commandDataMaxLenght];
+
+                rows.Add(new[]
+                {
+            InlineKeyboardButton.WithCallbackData($"📄 Экспорт", exportCallback)
+        });
             }
 
             rows.Add(new[]
             {
-                InlineKeyboardButton.WithCallbackData("🆕 Добавить", "addlist"),
-                InlineKeyboardButton.WithCallbackData("❌ Удалить", "deletelist")
-            });
+        InlineKeyboardButton.WithCallbackData("➕ Добавить список", "addlist"),
+        InlineKeyboardButton.WithCallbackData("🗑 Удалить список", "deletelist")
+    });
 
             return new InlineKeyboardMarkup(rows);
         }

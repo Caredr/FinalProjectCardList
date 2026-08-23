@@ -12,6 +12,8 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Microsoft.Extensions.Configuration;
+
 
 namespace FinalProjectCardList
 {
@@ -23,13 +25,21 @@ namespace FinalProjectCardList
 
             try
             {
+                // ← Загрузка настроек из appsettings.json
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .Build();
+
+                var telegramBotToken = config["TelegramBotToken"];
+                var connectionStringData = config["DatabaseConnection"];
+
                 CancellationTokenSource sourceToken = new();
                 CancellationToken token = sourceToken.Token;
 
-                var botClient = new TelegramBotClient("8531549139:AAGbr5w3jVvce4Bj0FvTXItzOXStzKbJn6c");
+                var botClient = new TelegramBotClient(telegramBotToken);  // ← Используем из конфига
 
-                string connectionString =
-                    "Host=localhost;Port=5432;Database=CardsLists;Username=postgres;Password=789web15";
+                string connectionString = connectionStringData;  // ← Используем из конфига
 
                 DataContextFactory factory = new DataContextFactory(connectionString);
 
