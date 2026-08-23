@@ -290,6 +290,48 @@ namespace FinalProjectCardList.Core.TelegramBot
 
             var callbackData = callbackQuery.Data ?? string.Empty;
             Console.WriteLine($"[UpdateHandler] Callback: {callbackData}, UserId: {userId}");
+            if (callbackData.StartsWith("export"))
+            {
+                var dto = ToDoListCallbackDto.FromString(callbackData);
+
+                var toDoUser = await _userService.GetUserAsync(userId, ct)
+                               ?? await _userService.RegisterUser(userId, callbackQuery.From.Username, ct);
+
+                Guid? listId = dto.ToDoListId == Guid.Empty ? null : dto.ToDoListId;
+                var tasks = await _iToDoService.GetByUserIdAndList(toDoUser.UserId, listId, ct);
+
+                var sb = new System.Text.StringBuilder();
+
+                if (listId.HasValue)
+                {
+                    var list = await _iToDoListService.GetAsync(listId.Value, ct);
+                    sb.AppendLine($"📋 Список: {list?.Name ?? "Без названия"}");
+                }
+                else
+                {
+                    sb.AppendLine("📋 Все задачи");
+                }
+
+                sb.AppendLine();
+
+                foreach (var task in tasks.OrderBy(t => t.Name))
+                {
+                    string quantity = task.Quantity > 1 ? $" x{task.Quantity}" : "";
+                    sb.AppendLine($"{task.Name}{quantity}");
+                }
+
+                sb.AppendLine();
+                sb.AppendLine($"Всего: {tasks.Count}");
+
+                await botClient.SendMessage(
+                    callbackQuery.Message.Chat.Id,
+                    sb.ToString(),
+                    cancellationToken: ct);
+
+                await botClient.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
+                return;
+            }
+
 
             if (callbackData == "addlist")
             {
@@ -622,7 +664,11 @@ namespace FinalProjectCardList.Core.TelegramBot
                     Action = "show",
                     ToDoListId = list.Id
                 };
-
+                var exportDto = new ToDoListCallbackDto
+                {
+                    Action = "export",
+                    ToDoListId = list.Id
+                };
                 var callbackData = ToDoListCallbackDto.ToString(dto);
                 if (callbackData.Length > commandDataMaxLenght)
                     callbackData = callbackData[..commandDataMaxLenght];
