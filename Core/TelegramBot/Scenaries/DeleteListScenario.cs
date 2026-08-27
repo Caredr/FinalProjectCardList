@@ -61,7 +61,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                     {
                         var dto = new ToDoListCallbackDto
                         {
-                            Action = "deletelist",
+                            Action = TaskActionScenario.DeleteList.ToAction(),
                             ToDoListId = list.Id
                         };
                         var cb = ToDoListCallbackDto.ToString(dto);

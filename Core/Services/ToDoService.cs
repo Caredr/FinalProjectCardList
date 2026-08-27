@@ -39,11 +39,11 @@ namespace FinalProjectCardList.Core.Services
 
             return item;
         }
-        public async Task<IReadOnlyList<ToDoItem>> GetAllByUserIdAsync(Guid userId, CancellationToken ct)
+        public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserIdAsync(Guid userId, CancellationToken ct)
         {
             return await _iToDoRepository.GetActiveByUserId(userId, ct);
         }
-        public async Task<IReadOnlyList<ToDoItem>> GetActiveByUserIdAsync(Guid userId, CancellationToken ct)
+        public async Task<IReadOnlyList<ToDoItem>> GetAllByUserIdAsync(Guid userId, CancellationToken ct)
         {
             return await _iToDoRepository.GetAllByUserId(userId, ct); 
         }

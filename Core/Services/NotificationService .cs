@@ -25,9 +25,10 @@ namespace FinalProjectCardList.Core.Infrastructure
        string text,DateTime scheduledAt, CancellationToken ct)
         {
             using var db = _factory.CreateDataContext();
+
             var exists = await db.Notification
-                .AnyAsync(n => n.UserId == userId && n.Type == type, ct)
-                .ConfigureAwait(false);
+                .AnyAsync(n => n.UserId == userId && n.Type == type && !n.IsNotified, ct)
+                  .ConfigureAwait(false);
 
             if (exists)
             {

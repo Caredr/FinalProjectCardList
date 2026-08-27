@@ -24,20 +24,27 @@ public class PriceBackgroundTask : IBackgroundTask
 
             foreach (var task in allTasks.Where(t => !string.IsNullOrEmpty(t.ScryfallSet)))
             {
-                var card = await _scryfall.GetCardPriceAsync(
-                    task.Name,
-                    task.ScryfallSet,
-                    task.ScryfallCollectorNumber,
-                    ct);
-
-                if (card != null && card.Usd.HasValue)
+                try
                 {
-                    task.LastPriceUsd = card.Usd;
-                    task.LastPriceCheckedAt = DateTime.UtcNow;
-                    await _todoService.Update(task, ct);
-                }
+                    var card = await _scryfall.GetCardPriceAsync(
+                        task.Name,
+                        task.ScryfallSet,
+                        task.ScryfallCollectorNumber,
+                        ct);
 
-                await Task.Delay(rateLimit, ct); 
+                    if (card != null && card.Usd.HasValue)
+                    {
+                        task.LastPriceUsd = card.Usd;
+                        task.LastPriceCheckedAt = DateTime.UtcNow;
+                        await _todoService.Update(task, ct);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Exception ex) { }
+            await Task.Delay(rateLimit, ct); 
             }
 
             await Task.Delay(TimeSpan.FromHours(hoursDelay), ct);

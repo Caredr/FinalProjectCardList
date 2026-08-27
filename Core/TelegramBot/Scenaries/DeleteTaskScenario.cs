@@ -56,12 +56,12 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                         var lists = await _todoListService.GetUserListsAsync(user.UserId, ct);
                         var rows = new List<IEnumerable<InlineKeyboardButton>>();
 
-                        var noListDto = new ToDoListCallbackDto { Action = "deletetask_list", ToDoListId = Guid.Empty };
+                        var noListDto = new ToDoListCallbackDto { Action = TaskActionScenario.DeleteTaskList.ToAction(), ToDoListId = Guid.Empty };
                         rows.Add(new[] { InlineKeyboardButton.WithCallbackData("📌 Без списка", ToDoListCallbackDto.ToString(noListDto)) });
 
                         foreach (var list in lists)
                         {
-                            var dto = new ToDoListCallbackDto { Action = "deletetask_list", ToDoListId = list.Id };
+                            var dto = new ToDoListCallbackDto { Action = TaskActionScenario.DeleteTaskList.ToAction(), ToDoListId = list.Id };
                             var cb = ToDoListCallbackDto.ToString(dto);
                             if (cb.Length > 64) cb = cb[..64];
                             rows.Add(new[] { InlineKeyboardButton.WithCallbackData(list.Name ?? "(без имени)", cb) });
@@ -98,7 +98,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                             string label = $"{state} {task.Name}";
                             if (label.Length > 40) label = label[..40];
 
-                            var dto = new ToDoListCallbackDto { Action = "deletetask_item", ToDoListId = task.Id };
+                            var dto = new ToDoListCallbackDto { Action = TaskActionScenario.DeleteTaskItem.ToAction(), ToDoListId = task.Id };
                             var cb = ToDoListCallbackDto.ToString(dto);
                             if (cb.Length > 64) cb = cb[..64];
                             rows.Add(new[] { InlineKeyboardButton.WithCallbackData(label, cb) });

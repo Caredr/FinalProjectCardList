@@ -75,14 +75,14 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
 
                 string text = $"{state} {task.Name}{deadline}";
 
-                var showDto = new ToDoItemCallbackDto { Action = "showtask", ToDoItemId = task.Id };
+                var showDto = new ToDoItemCallbackDto { Action = TaskActionScenario.ShowTask.ToAction(), ToDoItemId = task.Id };
 
                 var keyboard = new InlineKeyboardMarkup(new[]
                 {
                     InlineKeyboardButton.WithCallbackData("✅ Выполнить",
-                        new ToDoItemCallbackDto { Action = "completetask", ToDoItemId = task.Id }.ToString()),
+                        new ToDoItemCallbackDto { Action = TaskActionScenario.CompleteTask.ToAction(), ToDoItemId = task.Id }.ToString()),
                     InlineKeyboardButton.WithCallbackData("❌ Удалить",
-                        new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = task.Id }.ToString())
+                        new ToDoItemCallbackDto { Action = TaskActionScenario.DeleteTask.ToAction(), ToDoItemId = task.Id }.ToString())
                 });
 
                 await bot.SendMessage(chatId, text, replyMarkup: keyboard, cancellationToken: ct);
