@@ -79,7 +79,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                         {
                             var taskDto = new ToDoItemCallbackDto
                             {
-                                Action = "postpone_task",
+                                Action = TaskActionScenario.PostponeTask.ToAction(),
                                 ToDoItemId = task.Id
                             };
                             var callbackData = taskDto.ToString();  
@@ -141,7 +141,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
 
             var callbackTaskDto = ToDoItemCallbackDto.FromString(data);
 
-            if (callbackTaskDto.Action == "postpone_task")
+            if (callbackTaskDto.Action == TaskActionScenario.PostponeTask.ToAction())
             {
                 Console.WriteLine("[PostponeTaskScenario] Выбор задачи");
 
@@ -170,7 +170,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
 
                 var noListDto = new ToDoListCallbackDto
                 {
-                    Action = "postpone_list",
+                    Action = TaskActionScenario.PostponeList.ToAction(),
                     ToDoListId = Guid.Empty
                 };
                 var noListData = ToDoListCallbackDto.ToString(noListDto);
@@ -183,7 +183,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
                 {
                     var listDto = new ToDoListCallbackDto
                     {
-                        Action = "postpone_list",
+                        Action = TaskActionScenario.PostponeList.ToAction(),
                         ToDoListId = list.Id
                     };
                     var listCallbackData = ToDoListCallbackDto.ToString(listDto);
@@ -220,7 +220,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenarios
 
             var callbackListDto = ToDoListCallbackDto.FromString(data);
 
-            if (callbackListDto.Action == "postpone_list")
+            if (callbackListDto.Action == TaskActionScenario.PostponeList.ToAction())
             {
                 Console.WriteLine("[PostponeTaskScenario] Выбор списка");
 

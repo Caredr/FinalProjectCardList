@@ -67,7 +67,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                         var rows = new List<IEnumerable<InlineKeyboardButton>>();
                         var noListDto = new ToDoListCallbackDto
                         {
-                            Action = "addtask_list",
+                            Action = TaskActionScenario.AddTaskList.ToAction(),
                             ToDoListId = Guid.Empty
                         };
                         var noListData = ToDoListCallbackDto.ToString(noListDto);
@@ -80,7 +80,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                         {
                             var dto = new ToDoListCallbackDto
                             {
-                                Action = "addtask_list",
+                                Action = TaskActionScenario.AddTaskList.ToAction(),
                                 ToDoListId = list.Id
                             };
                             var callbackData = ToDoListCallbackDto.ToString(dto);
@@ -282,7 +282,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
             Console.WriteLine(
                 $"[HandleCallbackQueryAsync] Action = {dto.Action}, ToDoListId = {dto.ToDoListId}");
 
-            if (dto.Action != "addtask_list")
+            if (dto.Action != TaskActionScenario.AddTaskList.ToAction())
             {
                 await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: ct);
                 return ScenarioResult.Transition;
@@ -373,7 +373,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                      user,
                      taskName,
                      list,
-                     deadline,  // ← 25.12.2026
+                     deadline, 
                      quantity,
                      ct);
 

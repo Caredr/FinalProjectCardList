@@ -577,9 +577,9 @@ namespace FinalProjectCardList.Core.TelegramBot
                     var keyboard = new InlineKeyboardMarkup(new[]
                     {
                         InlineKeyboardButton.WithCallbackData("✅ Карта найденна",
-                            new ToDoItemCallbackDto { Action = "completetask", ToDoItemId = item.Id }.ToString()),
+                            new ToDoItemCallbackDto { Action = TaskActionScenario.CompleteTask.ToAction(), ToDoItemId = item.Id }.ToString()),
                         InlineKeyboardButton.WithCallbackData("❌ Удалить",
-                            new ToDoItemCallbackDto { Action = "deletetask", ToDoItemId = item.Id }.ToString())
+                            new ToDoItemCallbackDto { Action = TaskActionScenario.DeleteTask.ToAction(), ToDoItemId = item.Id }.ToString())
                     });
                     await botClient.EditMessageText(callbackQuery.Message!.Chat.Id, callbackQuery.Message.MessageId, text,
                         replyMarkup: keyboard, cancellationToken: ct);
@@ -681,7 +681,7 @@ namespace FinalProjectCardList.Core.TelegramBot
 
             var noListCallbackDto = new ToDoListCallbackDto
             {
-                Action = "show",
+                Action = TaskActionScenario.Show.ToAction(),
                 ToDoListId = Guid.Empty
             };
             var noListCallback = ToDoListCallbackDto.ToString(noListCallbackDto);
@@ -695,7 +695,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                 
                 var dto = new ToDoListCallbackDto
                 {
-                    Action = "show",
+                    Action = TaskActionScenario.Show.ToAction(),
                     ToDoListId = list.Id
                 };
                 var callbackData = ToDoListCallbackDto.ToString(dto);
@@ -710,7 +710,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                 
                 var exportDto = new ToDoListCallbackDto
                 {
-                    Action = "export",
+                    Action = TaskActionScenario.Show.ToAction(),
                     ToDoListId = list.Id
                 };
                 var exportCallback = ToDoListCallbackDto.ToString(exportDto);
@@ -810,7 +810,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                 "✅ Найденные",
                 new PagedListCallbackDto
                 {
-                    Action = "showcompleted",
+                    Action = TaskActionScenario.ShowCompleted.ToAction(),
                     ToDoListId = listDto.ToDoListId,
                     Page = 0
                 }.ToString());
@@ -839,7 +839,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                        BuildTaskLabel(index, task), 
                        new ToDoItemCallbackDto
                         {
-                            Action = "showtask",
+                            Action = TaskActionScenario.ShowTask.ToAction(),
                             ToDoItemId = task.Id
                         }.ToString()))
                 .ToList();
@@ -893,7 +893,7 @@ namespace FinalProjectCardList.Core.TelegramBot
                 "◀️ Назад",
                 new PagedListCallbackDto
                 {
-                    Action = "show",
+                    Action = TaskActionScenario.Show.ToAction(),
                     ToDoListId = listDto.ToDoListId,
                     Page = 0
                 }.ToString());
@@ -939,7 +939,7 @@ namespace FinalProjectCardList.Core.TelegramBot
             var pairs = completed
                 .Select((t, index) => new KeyValuePair<string, string>(
                     BuildTaskLabel(index, t),
-                    new ToDoItemCallbackDto { Action = "showtask", ToDoItemId = t.Id }.ToString()))
+                    new ToDoItemCallbackDto { Action = TaskActionScenario.ShowTask.ToAction(), ToDoItemId = t.Id }.ToString()))
                 .ToList();
 
             var markup = BuildPagedButtons(pairs, listDto);

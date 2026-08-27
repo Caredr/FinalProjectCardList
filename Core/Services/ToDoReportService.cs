@@ -24,7 +24,6 @@ namespace FinalProjectCardList.Core.Services
             DateTime generatedAt;
             List<ToDoItem> items = (List<ToDoItem>)await _iToDoRepository.GetActiveByUserId(userId, ct);
             total = items.Count();
-            items = (List<ToDoItem>)await _iToDoRepository.GetActiveByUserId(userId, ct);
             active = items.Count;
             completed = total - active;
             generatedAt = DateTime.UtcNow;
