@@ -164,7 +164,7 @@ namespace FinalProjectCardList.Core.TelegramBot.Scenaries
                             },
                             cancellationToken: ct);
 
-                        context.CurrentStep = "Deadline";  // ← ИЗМЕНИТЕ НА ЭТО
+                        context.CurrentStep = "Deadline";  
                         return ScenarioResult.Transition;
                     }
                 case "Deadline":

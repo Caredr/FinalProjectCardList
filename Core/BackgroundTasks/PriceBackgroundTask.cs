@@ -43,7 +43,6 @@ public class PriceBackgroundTask : IBackgroundTask
                 {
                     return;
                 }
-                catch (Exception ex) { }
             await Task.Delay(rateLimit, ct); 
             }
 
