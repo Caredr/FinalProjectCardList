@@ -25,7 +25,7 @@ namespace FinalProjectCardList
 
             try
             {
-                // ← Загрузка настроек из appsettings.json
+               
                 var config = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json")
@@ -37,9 +37,9 @@ namespace FinalProjectCardList
                 CancellationTokenSource sourceToken = new();
                 CancellationToken token = sourceToken.Token;
 
-                var botClient = new TelegramBotClient(telegramBotToken);  // ← Используем из конфига
+                var botClient = new TelegramBotClient(telegramBotToken);  
 
-                string connectionString = connectionStringData;  // ← Используем из конфига
+                string connectionString = connectionStringData;  
 
                 DataContextFactory factory = new DataContextFactory(connectionString);
 
